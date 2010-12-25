@@ -286,7 +286,7 @@
     
     //  getting properties
     roundTime: function () {
-      return -~this.video.currentTime;
+      return Math.round( this.video.currentTime );
     },
     
     

@@ -157,13 +157,17 @@ module("Popcorn Methods");
 
 test("roundTime", function () {
   
-  QUnit.reset();
+  expect(2);
   
-  var popped = Popcorn("#video");
+  var p = Popcorn("#video");
   
-  popped.play().pause().currentTime( 0.98 );
+  p.play().pause().currentTime( 0.98 );
   
-  equals( 1, popped.roundTime(), ".roundTime() returns 1 when currentTime is 0.98s" );
+  equals( 1, p.roundTime(), ".roundTime() returns 1 when currentTime is 0.98s" );
+
+  p.play().pause().currentTime( 1.04 );
+
+  equals( 1, p.roundTime(), ".roundTime() returns 1 when currentTime is 1.04s" );  
 
 
 });
