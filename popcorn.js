@@ -1,4 +1,4 @@
-(function(global, document) {
+(function( global, document) {
 
   //  Cache refs to speed up calls to native utils
   var  
@@ -7,15 +7,14 @@
   slice = Array.prototype.slice,
 
   //  ID string matching
-  rIdExp  = /^(#([\w\-\_\.]+))$/, 
+  rIdExp = /^(#([\w\-\_\.]+))$/, 
   
   // ready fn cache
   readyStack = [], 
   readyBound = false,
   readyFired = false,
-  
 
-  //  Declare a pseudo-private constructor
+  //  Popcorn constructor
   //  Returns an instance object.    
   Popcorn = function( entity ) {
     //  Return new Popcorn object
@@ -29,21 +28,20 @@
     init: function( entity ) {
 
       var elem, matches;
-      
+
       //  Supports Popcorn(function () { /../ }) 
       //  Originally proposed by Daniel Brooks
-      
+
       if ( typeof entity === "function" ) {
-      
+
         //  If document ready has already fired
         if ( document.readyState === "interactive" || document.readyState === "complete" ) {
-          
+
           entity(document, Popcorn);
-          
+
           return;
         }
-        
-        
+
         readyStack.push( entity );
 
         //  This process should happen once per page load
@@ -53,9 +51,9 @@
           readyBound = true;
 
           var DOMContentLoaded  = function () {
-            
+
             readyFired = true;
-            
+
             //  remove this listener
             document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
 
@@ -72,30 +70,28 @@
           document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false);
         }
 
-        
-        
         return;  
       }
- 
       
+      //  Qualify the `entity` as a valid id selector
       matches = rIdExp.exec( entity );
       
+      //  If `matches` is satified, attempt to get the element
       if ( matches.length && matches[2]  ) {
         elem = document.getElementById(matches[2]);
       }
-      
-      
+
       this.video = elem ? elem : null;
-      
+
       this.data = {
         history: [],
         events: {},
         trackEvents: {
           byStart: [{start: -1, end: -1}],
           byEnd:   [{start: -1, end: -1}],
-          startIndex: 0,
-          endIndex:   0,
-          previousUpdateTime: 0
+          startIdx: 0,
+          endIdx:   0,
+          prevUpdateTime: 0
         }
       };
       
@@ -114,7 +110,7 @@
           that.video.addEventListener( "timeupdate", function( event ) {
 
             var currentTime    = this.currentTime,
-                previousTime   = that.data.trackEvents.previousUpdateTime,
+                previousTime   = that.data.trackEvents.prevUpdateTime,
                 tracks         = that.data.trackEvents,
                 tracksByEnd    = tracks.byEnd,
                 tracksByStart  = tracks.byStart;
@@ -122,39 +118,39 @@
             // Playbar advancing
             if ( previousTime < currentTime ) {
 
-              while ( tracksByEnd[tracks.endIndex] && tracksByEnd[tracks.endIndex].end <= currentTime ) {
-                if ( tracksByEnd[tracks.endIndex]._running === true ) {
-                  tracksByEnd[tracks.endIndex]._running = false;
-                  tracksByEnd[tracks.endIndex]._natives.end.call( that, event, tracksByEnd[tracks.endIndex] );
+              while ( tracksByEnd[tracks.endIdx] && tracksByEnd[tracks.endIdx].end <= currentTime ) {
+                if ( tracksByEnd[tracks.endIdx]._running === true ) {
+                  tracksByEnd[tracks.endIdx]._running = false;
+                  tracksByEnd[tracks.endIdx]._natives.end.call( that, event, tracksByEnd[tracks.endIdx] );
                 }
-                tracks.endIndex++;
+                tracks.endIdx++;
               }
               
-              while ( tracksByStart[tracks.startIndex] && tracksByStart[tracks.startIndex].start <= currentTime ) {
-                if ( tracksByStart[tracks.startIndex].end > currentTime && tracksByStart[tracks.startIndex]._running === false ) {
-                  tracksByStart[tracks.startIndex]._running = true;
-                  tracksByStart[tracks.startIndex]._natives.start.call( that, event, tracksByStart[tracks.startIndex] );
+              while ( tracksByStart[tracks.startIdx] && tracksByStart[tracks.startIdx].start <= currentTime ) {
+                if ( tracksByStart[tracks.startIdx].end > currentTime && tracksByStart[tracks.startIdx]._running === false ) {
+                  tracksByStart[tracks.startIdx]._running = true;
+                  tracksByStart[tracks.startIdx]._natives.start.call( that, event, tracksByStart[tracks.startIdx] );
                 }
-                tracks.startIndex++;
+                tracks.startIdx++;
               }
 
             // Playbar receding
             } else if ( previousTime > currentTime ) {
 
-              while ( tracksByStart[tracks.startIndex] && tracksByStart[tracks.startIndex].start > currentTime ) {
-                if ( tracksByStart[tracks.startIndex]._running === true ) {
-                  tracksByStart[tracks.startIndex]._running = false;
-                  tracksByStart[tracks.startIndex]._natives.end.call( that, event, tracksByStart[tracks.startIndex] );
+              while ( tracksByStart[tracks.startIdx] && tracksByStart[tracks.startIdx].start > currentTime ) {
+                if ( tracksByStart[tracks.startIdx]._running === true ) {
+                  tracksByStart[tracks.startIdx]._running = false;
+                  tracksByStart[tracks.startIdx]._natives.end.call( that, event, tracksByStart[tracks.startIdx] );
                 }
-                tracks.startIndex--;
+                tracks.startIdx--;
               }
               
-              while ( tracksByEnd[tracks.endIndex] && tracksByEnd[tracks.endIndex].end > currentTime ) {
-                if ( tracksByEnd[tracks.endIndex].start <= currentTime && tracksByEnd[tracks.endIndex]._running === false ) {
-                  tracksByEnd[tracks.endIndex]._running = true;
-                  tracksByEnd[tracks.endIndex]._natives.start.call( that, event, tracksByEnd[tracks.endIndex] );
+              while ( tracksByEnd[tracks.endIdx] && tracksByEnd[tracks.endIdx].end > currentTime ) {
+                if ( tracksByEnd[tracks.endIdx].start <= currentTime && tracksByEnd[tracks.endIdx]._running === false ) {
+                  tracksByEnd[tracks.endIdx]._running = true;
+                  tracksByEnd[tracks.endIdx]._natives.start.call( that, event, tracksByEnd[tracks.endIdx] );
                 }
-                tracks.endIndex--;
+                tracks.endIdx--;
               }
             } 
             /*
@@ -167,7 +163,7 @@
               // happens in both Chrome and Firefox.
             }
             */
-            tracks.previousUpdateTime = currentTime;
+            tracks.prevUpdateTime = currentTime;
             
           }, false);
         } else {
@@ -337,8 +333,8 @@
         if ( byStart[s] && byStart[s]._natives && byStart[s]._natives.type === name ) {
           byStart.splice( s, 1 );
           s--; sl--; // update for loop if something removed, but keep checking
-          if ( this.data.trackEvents.startIndex <= s ) {
-            this.data.trackEvents.startIndex--; // write test for this
+          if ( this.data.trackEvents.startIdx <= s ) {
+            this.data.trackEvents.startIdx--; // write test for this
           }
         }
       }
@@ -346,8 +342,8 @@
         if ( byEnd[e] && byEnd[e]._natives && byEnd[e]._natives.type === name ) {
           byEnd.splice( e, 1 );
           e--; el--; // update for loop if something removed, but keep checking
-          if ( this.data.trackEvents.endIndex <= e ) {
-            this.data.trackEvents.endIndex--; // write test for this
+          if ( this.data.trackEvents.endIdx <= e ) {
+            this.data.trackEvents.endIdx--; // write test for this
           }
         }
       }
@@ -550,12 +546,12 @@
     
     
     //  Update 
-    if ( indexWasAt <= obj.data.trackEvents.startIndex ) {
-      obj.data.trackEvents.startIndex--;
+    if ( indexWasAt <= obj.data.trackEvents.startIdx ) {
+      obj.data.trackEvents.startIdx--;
     }
 
-    if ( indexWasAt <= obj.data.trackEvents.endIndex ) {
-      obj.data.trackEvents.endIndex--;
+    if ( indexWasAt <= obj.data.trackEvents.endIdx ) {
+      obj.data.trackEvents.endIdx--;
     }
     
     
