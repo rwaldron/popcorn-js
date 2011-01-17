@@ -9,10 +9,21 @@
           remote: "",
           data: []
         },
-        manifestData = {};
+        manifestData = {}, 
+        dataObj = data.json.data;
         
         
-    console.log(data);        
+    Popcorn.forEach( dataObj, function ( obj, key ) {
+    
+      Popcorn.forEach( obj, function ( plugin, pkey ) {
+      
+      
+        console.log(plugin, pkey);
+      
+      });
+    
+    
+    });
 
 
     return retObj;
