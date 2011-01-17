@@ -861,21 +861,21 @@
     Popcorn.forEach( videos, function ( iter, key ) {
 
       var video = videos[ key ],
+          hasDataSources = false, 
           dataSources, dataTemp, dataType, parserFn, popcornVideo;
-
+      
       //  Ensure we're looking at a dom node and that it has an id
       //  otherwise Popcorn won't be able to find the video element
       if ( video.nodeType && video.nodeType === 1 && video.id ) {
+      
+        popcornVideo = Popcorn( "#" + video.id );
 
-        dataSources = video.getAttribute( "data-timeline-sources" ).split(",");
-        
+        dataSources = ( video.getAttribute( "data-timeline-sources" ) || "" ).split(",");
+
         if ( dataSources.length )  {
-          
-          popcornVideo = Popcorn( "#" + video.id );
-        
-          
+
           Popcorn.forEach( dataSources, function ( source ) {
-            
+
             dataTemp = source.split( "." );
 
             dataType = ( dataTemp[ dataTemp.length - 1 ] ).toUpperCase(); 
