@@ -14,17 +14,8 @@
         
         
     Popcorn.forEach( dataObj, function ( obj, key ) {
-    
-      Popcorn.forEach( obj, function ( plugin, pkey ) {
-      
-      
-        console.log(plugin, pkey);
-      
-      });
-    
-    
+      retObj.data.push( obj );
     });
-
 
     return retObj;
   });
