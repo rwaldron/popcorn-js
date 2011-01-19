@@ -1,6 +1,6 @@
 test("Popcorn 0.3 JSON Parser Plugin", function () {
   
-  var expects = 9,
+  var expects = 12,
       count = 0,
       timeOut = 0,
       numLoadingEvents = 5, 
@@ -38,11 +38,12 @@ test("Popcorn 0.3 JSON Parser Plugin", function () {
   
     Popcorn.xhr({
       url: 'data/data.json', 
+      dataType: "json", 
       success: function( data ) {
         
         var idx = 0;
         
-        Popcorn.forEach( data.json.data, function (dataObj) {
+        Popcorn.forEach( data.data, function (dataObj) {
           Popcorn.forEach( dataObj, function ( obj, key ) {
           
             
