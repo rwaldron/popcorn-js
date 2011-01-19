@@ -811,7 +811,7 @@
   
   Popcorn.xhr = function ( options ) {
     
-    if ( ( options.dataType || "" ).toLowerCase() === "jsonp" ) {
+    if ( options.dataType && options.dataType.toLowerCase() === "jsonp" ) {
       
       Popcorn.xhr.getJSONP( 
         options.url,
@@ -821,8 +821,13 @@
     }
     
     var settings = Popcorn.extend( {}, setup, options );
-
+    
+    //  Create new XMLHttpRequest object
     settings.ajax  = settings.xhr();
+    
+    //  Normalize dataType
+    settings.dataType  = settings.dataType.toLowerCase();
+    
     
     if ( settings.ajax ) {
     
@@ -863,6 +868,12 @@
           text: settings.ajax.responseText, 
           json: json
         };
+        
+        //  If a dataType was specified, return that type of data
+        if ( settings.dataType ) {
+          data = data[ settings.dataType ];
+        }
+        
 
         settings.success.call( settings.ajax, data );
         
@@ -879,13 +890,23 @@
       script = document.createElement("script"), 
       paramStr = url.split("?")[1], 
       fired = false, 
-      params, callback;
+      params = [], 
+      callback;
 
-    script.src = url; 
-
-    params = paramStr.split("&");
+    if ( paramStr ) {
+      params = paramStr.split("&");
+    }
     
-    callback = params.length ? params[ params.length - 1 ].split("=")[1] : Popcorn.guid("jsonp");
+    
+    callback = params.length ? params[ params.length - 1 ].split("=")[1] : "jsonp";
+    
+    
+    if ( !paramStr ) {
+      url += "?callback=" + callback;
+    }
+    
+    script.src = url;
+    
     
     if ( callback ) {
       //  define the jsonp success callback globally
@@ -907,7 +928,7 @@
 
     head.insertBefore( script, head.firstChild );
   
-  }
+  };
   
   
   //  Exposes Popcorn to global context
