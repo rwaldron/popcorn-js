@@ -203,6 +203,23 @@ test("exec", function () {
 
 });
 
+module("Popcorn Playback Engine");
+
+test("Popcorn.playback( name, function )", function () {
+  
+  expect(2);
+  
+  
+  equals( typeof Popcorn.engines.default, "function", "Popcorn.engines.default() playback engine added to Popcorn.engines" );
+  
+  
+  Popcorn.playback( "api", function() { });
+  
+  
+  equals( typeof Popcorn.engines.api, "function", "playback engine added to Popcorn.engines" );
+
+});
+
 
 module("Popcorn Events");
 

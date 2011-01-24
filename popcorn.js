@@ -5,7 +5,7 @@
   forEach = Array.prototype.forEach, 
   hasOwn = Object.prototype.hasOwnProperty, 
   slice = Array.prototype.slice,
-
+  
   //  ID string matching
   rIdExp  = /^(#([\w\-\_\.]+))$/, 
   
@@ -17,16 +17,16 @@
 
   //  Declare a pseudo-private constructor
   //  Returns an instance object.    
-  Popcorn = function( entity ) {
+  Popcorn = function( entity, engine ) {
     //  Return new Popcorn object
-    return new Popcorn.p.init( entity );
+    return new Popcorn.p.init( entity, engine || null );
   };
 
   //  Declare a shortcut (Popcorn.p) to and a definition of 
   //  the new prototype for our Popcorn constructor 
   Popcorn.p = Popcorn.prototype = {
 
-    init: function( entity ) {
+    init: function( entity, engine ) {
 
       var elem, matches;
       
@@ -72,8 +72,6 @@
           document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false);
         }
 
-        
-        
         return;  
       }
  
@@ -102,78 +100,19 @@
       var isReady = function( that ) {
 
         if ( that.video.readyState >= 3 ) {
-          // adding padding to the front and end of the arrays
-          // this is so we do not fall off either end
-
-          var videoDurationPlus = that.video.duration + 1;
-          Popcorn.addTrackEvent( that, {
-            start: videoDurationPlus,
-            end: videoDurationPlus
-          });
           
-          that.video.addEventListener( "timeupdate", function( event ) {
-
-            var currentTime    = this.currentTime,
-                previousTime   = that.data.trackEvents.previousUpdateTime,
-                tracks         = that.data.trackEvents,
-                tracksByEnd    = tracks.byEnd,
-                tracksByStart  = tracks.byStart;
-
-            // Playbar advancing
-            if ( previousTime < currentTime ) {
-
-              while ( tracksByEnd[tracks.endIndex] && tracksByEnd[tracks.endIndex].end <= currentTime ) {
-                if ( tracksByEnd[tracks.endIndex]._running === true ) {
-                  tracksByEnd[tracks.endIndex]._running = false;
-                  tracksByEnd[tracks.endIndex]._natives.end.call( that, event, tracksByEnd[tracks.endIndex] );
-                }
-                tracks.endIndex++;
-              }
-              
-              while ( tracksByStart[tracks.startIndex] && tracksByStart[tracks.startIndex].start <= currentTime ) {
-                if ( tracksByStart[tracks.startIndex].end > currentTime && tracksByStart[tracks.startIndex]._running === false ) {
-                  tracksByStart[tracks.startIndex]._running = true;
-                  tracksByStart[tracks.startIndex]._natives.start.call( that, event, tracksByStart[tracks.startIndex] );
-                }
-                tracks.startIndex++;
-              }
-
-            // Playbar receding
-            } else if ( previousTime > currentTime ) {
-
-              while ( tracksByStart[tracks.startIndex] && tracksByStart[tracks.startIndex].start > currentTime ) {
-                if ( tracksByStart[tracks.startIndex]._running === true ) {
-                  tracksByStart[tracks.startIndex]._running = false;
-                  tracksByStart[tracks.startIndex]._natives.end.call( that, event, tracksByStart[tracks.startIndex] );
-                }
-                tracks.startIndex--;
-              }
-              
-              while ( tracksByEnd[tracks.endIndex] && tracksByEnd[tracks.endIndex].end > currentTime ) {
-                if ( tracksByEnd[tracks.endIndex].start <= currentTime && tracksByEnd[tracks.endIndex]._running === false ) {
-                  tracksByEnd[tracks.endIndex]._running = true;
-                  tracksByEnd[tracks.endIndex]._natives.start.call( that, event, tracksByEnd[tracks.endIndex] );
-                }
-                tracks.endIndex--;
-              }
-            } 
-            /*
-            //  This empty block causes errors with jslint
-            
-            else {
-              // When user seeks, currentTime can be equal to previousTime on the
-              // timeUpdate event. We are not doing anything with this right now, but we
-              // may need this at a later point and should be aware that this behavior
-              // happens in both Chrome and Firefox.
-            }
-            */
-            tracks.previousUpdateTime = currentTime;
-            
-          }, false);
+          
+          Popcorn.playback( engine || "default", that );
+          
+          
         } else {
+        
           global.setTimeout( function() {
+        
             isReady( that );
+        
           }, 1);
+        
         }
       };
 
@@ -947,6 +886,128 @@
     head.insertBefore( script, head.firstChild );
   
   };
+  
+  
+  //  PLAYBACK ENGINE ---------------------------
+  
+  //  Popcorn.playback() is used to define an 
+  //  engine or call the engine
+  
+  Popcorn.playback = function( engine, entity ) {
+    
+    //  If `entity` is a function, assume we're 
+    //  defining a new engine
+    if ( typeof entity === "function" ) {
+      
+      //  Add to engines list
+      Popcorn.engines[ engine ] = entity;
+      
+      //  TODO: make this a relevant return 
+      return;
+    }
+    
+    Popcorn.engines[ engine ]( entity );
+    
+  };
+  
+  Popcorn.engines = {
+    
+    "default" : function( entity ) {
+    
+      //  `entity` refers to the popcorn instance
+      
+      
+      // adding padding to the front and end of the arrays
+      // this is so we do not fall off either end
+      
+      var videoDurationPlus = entity.video.duration + 1;
+      
+      Popcorn.addTrackEvent( entity, {
+        start: videoDurationPlus,
+        end: videoDurationPlus
+      });
+
+      entity.video.addEventListener( "timeupdate", function( event ) {
+
+        var currentTime    = this.currentTime,
+            previousTime   = entity.data.trackEvents.previousUpdateTime,
+            tracks         = entity.data.trackEvents,
+            tracksByEnd    = tracks.byEnd,
+            tracksByStart  = tracks.byStart, 
+            trackEndIdx, 
+            trackStartIdx;
+
+        // Playbar advancing
+        if ( previousTime < currentTime ) {
+
+          while ( tracksByEnd[ tracks.endIndex ] && 
+                    tracksByEnd[ tracks.endIndex ].end <= currentTime ) {
+            
+            trackEndIdx = tracksByEnd[ tracks.endIndex ];
+          
+            if ( trackEndIdx._running === true ) {
+              
+              trackEndIdx._running = false;
+              trackEndIdx._natives.end.call( entity, event, trackEndIdx );
+            
+            }
+            tracks.endIndex++;
+          }
+
+          while ( tracksByStart[ tracks.startIndex ] && 
+                    tracksByStart[ tracks.startIndex ].start <= currentTime ) {
+            
+            trackStartIdx = tracksByStart[ tracks.startIndex ];
+          
+            if ( trackStartIdx.end > currentTime && trackStartIdx._running === false ) {
+            
+              trackStartIdx._running = true;
+              trackStartIdx._natives.start.call( entity, event, trackStartIdx );
+            
+            }
+            tracks.startIndex++;
+          }
+
+        // Playbar receding
+        } else if ( previousTime > currentTime ) {
+
+          while ( tracksByStart[ tracks.startIndex ] && 
+                    tracksByStart[ tracks.startIndex ].start > currentTime ) {
+            
+            trackStartIdx = tracksByStart[ tracks.startIndex ];
+          
+            if ( trackStartIdx._running === true ) {
+              
+              trackStartIdx._running = false;
+              trackStartIdx._natives.end.call( entity, event, trackStartIdx );
+            
+            }
+            tracks.startIndex--;
+          }
+
+          while ( tracksByEnd[ tracks.endIndex ] && 
+                    tracksByEnd[ tracks.endIndex ].end > currentTime ) {
+            
+            trackEndIdx = tracksByEnd[ tracks.endIndex ];
+          
+            if ( trackEndIdx.start <= currentTime && trackEndIdx._running === false ) {
+              
+              trackEndIdx._running = true;
+              trackEndIdx._natives.start.call( entity, event, trackEndIdx );
+            
+            }
+            tracks.endIndex--;
+          }
+        } 
+ 
+ 
+        tracks.previousUpdateTime = currentTime;
+
+      }, false);      
+    }
+  };
+  
+  
 
   
   //  Exposes Popcorn to global context
