@@ -896,7 +896,7 @@
   Popcorn.playback = function( engine, entity ) {
     
     //  If `entity` is a function, assume we're 
-    //  defining a new engine
+    //  defining a new playback engine
     if ( typeof entity === "function" ) {
       
       //  Add to engines list
@@ -906,6 +906,7 @@
       return;
     }
     
+    //  `entity` is a popcorn instance
     Popcorn.engines[ engine ]( entity );
     
   };
@@ -915,21 +916,20 @@
     "default" : function( entity ) {
     
       //  `entity` refers to the popcorn instance
-      
-      
+
       // adding padding to the front and end of the arrays
       // this is so we do not fall off either end
-      
-      var videoDurationPlus = entity.video.duration + 1;
-      
+      var durationPad = entity.video.duration + 1;
+
+      //  Add a dummy track to the popcorn instance
       Popcorn.addTrackEvent( entity, {
-        start: videoDurationPlus,
-        end: videoDurationPlus
+        start: durationPad,
+        end: durationPad
       });
 
-      entity.video.addEventListener( "timeupdate", function( event ) {
+      entity.listen( "timeupdate", function( event ) {
 
-        var currentTime    = this.currentTime,
+        var currentTime    = entity.currentTime(),
             previousTime   = entity.data.trackEvents.previousUpdateTime,
             tracks         = entity.data.trackEvents,
             tracksByEnd    = tracks.byEnd,
@@ -939,7 +939,7 @@
 
         // Playbar advancing
         if ( previousTime < currentTime ) {
-
+        
           while ( tracksByEnd[ tracks.endIndex ] && 
                     tracksByEnd[ tracks.endIndex ].end <= currentTime ) {
             
@@ -1003,7 +1003,8 @@
  
         tracks.previousUpdateTime = currentTime;
 
-      }, false);      
+      //}, false);      
+      });
     }
   };
   
@@ -1061,12 +1062,12 @@
             }
           });
 
-        }          
+        }
 
         //  Only play the video if it was specified to do so
         if ( !!popcornVideo.autoplay ) {
           popcornVideo.play();
-        }           
+        }
 
       }
     });
