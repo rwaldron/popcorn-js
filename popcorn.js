@@ -840,7 +840,6 @@
   };
   
   
-  
   Popcorn.xhr.getJSONP = function ( url, success ) {
   
     var head = document.getElementsByTagName("head")[0] || document.documentElement,
