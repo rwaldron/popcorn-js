@@ -1207,7 +1207,7 @@ test("JSONP Response", function () {
 
 test("Popcorn.getScript()", function () {
 
-  var expects = 10,  
+  var expects = 8,  
       count = 0;
       
   function plus() {
@@ -1232,11 +1232,9 @@ test("Popcorn.getScript()", function () {
       ok( true, "getScript A returned");
       plus();
       
-      ok( ("alpha" in window) , "Popcorn.xhr.getScript remoteA.js loaded: `alpha` is available");
-      plus();
       
       
-      ok( ("AlphaLib" in window) , "Popcorn.xhr.getScript remoteA.js loaded: `AlphaLib` is available");
+      ok( Popcorn.AlphaLib, "Popcorn.xhr.getScript remoteA.js loaded: `Popcorn.AlphaLib` is available");
       plus();
       
     }
@@ -1250,13 +1248,9 @@ test("Popcorn.getScript()", function () {
       
       ok( true, "getScript B returned");
       plus();
-      
 
-      ok( ("beta" in window) , "Popcorn.getScript remoteB.js loaded: `beta` is available");
-      plus();
       
-      
-      ok( ("BetaLib" in window) , "Popcorn.getScript remoteB.js loaded: `BetaLib` is available ");
+      ok( Popcorn.BetaLib , "Popcorn.getScript remoteB.js loaded: `Popcorn.BetaLib` is available ");
       plus();
       
     }
@@ -1277,6 +1271,7 @@ test("Popcorn.getScript()", function () {
       plus();
       
       
+      delete window["Processing"];
     }
   );
   
