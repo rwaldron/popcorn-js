@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Popcorn scopemonkey Plug-in Demo</title>
+  
+  <script src="../../popcorn.js"></script>
+  <script src="popcorn.scopemonkey.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var p = Popcorn('#video')
+      .volume(0)
+      .scopemonkey({
+        start: 0, // seconds
+        end: 10, // seconds
+        target: "scoped",
+        output: "scopemonkey call 1"
+      })
+      .scopemonkey({
+        start: 5, // seconds
+        end: 15, // seconds
+        target: "scoped",
+        output: "scopemonkey call 2"
+      })
+      .play();
+      
+    }, false);
+  </script>
+  <style>
+  
+  #scoped {
+    display: block;
+    height: 50px;
+    width: 500px;
+  }
+  </style>
+</head>
+<body>
+  <h1 id="qunit-header">Popcorn scopemonkey Plug-in Demo</h1>
+  <p> A scopemonkey message will appear at 0 seconds and disappear at 10 seconds.</p>
+  <p> A scopemonkey message will appear at 5 seconds and disappear at 15 seconds.</p>
+  <div>
+    <video id='video' 
+      controls 
+      width= '250px'
+      poster="../../test/poster.png"> 
+
+      <source id='mp4'
+        src="../../test/trailer.mp4"
+        type='video/mp4; codecs="avc1, mp4a"'> 
+
+      <source id='ogv'
+        src="../../test/trailer.ogv"
+        type='video/ogg; codecs="theora, vorbis"'> 
+
+      <p>Your user agent does not support the HTML5 Video element.</p> 
+
+    </video> 
+  </div>
+  
+  <div id="scoped"></div>
+  
+
+</body>
+</html>
