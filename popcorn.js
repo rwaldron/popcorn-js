@@ -1020,7 +1020,9 @@
         delete window[ callback ];
         
         //  Garbage collect the script resource
-        head.removeChild( script );
+        if ( script ) {
+          head.removeChild( script );
+        }
       }
     };  
 
