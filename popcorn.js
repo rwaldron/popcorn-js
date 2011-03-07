@@ -106,6 +106,7 @@
       };
 
       var isReady = function( that ) {
+	  
 
         if ( that.video.readyState >= 2 ) {
           // adding padding to the front and end of the arrays
@@ -118,15 +119,23 @@
           Popcorn.addTrackEvent( that, {
             start: videoDurationPlus,
             end: videoDurationPlus
-          });
-
+          }); 
+		  
           that.video.addEventListener( "timeupdate", function( event ) {
 
+		  //that.video.pause();
+		  
             var currentTime    = this.currentTime,
                 previousTime   = that.data.trackEvents.previousUpdateTime,
                 tracks         = that.data.trackEvents,
                 tracksByEnd    = tracks.byEnd,
                 tracksByStart  = tracks.byStart;
+
+			//If a user clicks a link on the page, pause the video
+			for ( i = 0; i < document.links.length; i++ ){
+			  document.links[ i ].setAttribute( "vidId",  that.video.id);
+		      document.links[ i ].setAttribute( "onclick", "Popcorn('#'+ this.getAttribute('vidId')).pause()" );
+			}			
 
             // Playbar advancing
             if ( previousTime < currentTime ) {
@@ -219,6 +228,7 @@
       return this;
     }
   };
+  
 
   //  This trick allows our api methods to be chained to
   //  instance references.
@@ -658,6 +668,7 @@
   //  with plugin functionality
   Popcorn.plugin = function( name, definition, manifest ) {
 
+  
     if ( Popcorn.protect.natives.indexOf( name.toLowerCase() ) >= 0 ) {
       Popcorn.error("'" + name + "' is a protected function name");
       return;
@@ -755,7 +766,7 @@
     Popcorn.registry.push( Popcorn.extend( plugin, {
       type: name
     }) );
-
+	
     return plugin;
   };
 
@@ -1050,6 +1061,7 @@
       var video = videos[ key ],
           hasDataSources = false,
           dataSources, data, popcornVideo;
+		  
 
       //  Ensure that the DOM has an id
       if ( !video.id ) {
@@ -1100,5 +1112,4 @@
       }
     });
   }, false );
-
 })(window, window.document);
