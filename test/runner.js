@@ -27,7 +27,6 @@ $(function () {
 						
 						return ({ 
 
-							
 							update: function( data ) {
 								for ( var p in data ) {
 									Test.data[ p ] += data[ p ];
@@ -64,7 +63,7 @@ $(function () {
 
 								$menu.empty();
 		
-								$.each( data.plugins, function( idx, test ) {
+								$.each( data[ Test.subject ], function( idx, test ) {
 
 									title = test.split("/")[ 1 ];
 
