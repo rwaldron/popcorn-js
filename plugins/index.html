@@ -1,6 +1,7 @@
 <!DOCTYPE>
 <html>
 <head>
+	<script src="http://code.jquery.com/jquery.js"></script>
   <title>Popcorn Plug-in Unit Tests</title>  
 </head>
 <body onload="runAllTests();">
@@ -27,6 +28,42 @@
   </div>
   <iframe id="out" name="out" style="position:absolute;top:0px;left:150px;height:100%;width:100%"></iframe>
   <script>
+
+	$(function () {
+
+		var $menu = $("#menuItems");
+		
+		$.ajax({
+			url: "plugins.json", 
+			type: "get", 
+			dataType: "json", 
+			success: function( data ) {
+
+				var title, 
+						$lis = [];
+
+				$menu.empty();
+				
+				$.each( data.plugins, function( idx, test ) {
+
+					title = test.split("/")[ 1 ];
+
+					$lis.push( '<li><a target="out" href="../'+ test +'">'+ title +'</a></li>' );
+					
+				});
+
+				$menu.append( $lis.join("") );
+			}
+		});
+
+
+		$menu.delegate( "a", "click", function() {
+			clearEvents();
+		});
+
+	});
+
+  
   var eventList = [];
   function runAllTests(){
     var testUrl = [ "attribution", "code", "flickr", "footnote", "googlemap", 
