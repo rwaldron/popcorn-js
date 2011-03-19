@@ -13,7 +13,7 @@ test("Popcorn Footnote Plugin", function () {
     }
   }
   
-  stop();
+  stop(15000);
    
   ok ('footnote' in popped, "footnote is a mehtod of the popped instance");
   plus();
@@ -53,6 +53,54 @@ test("Popcorn Footnote Plugin", function () {
     ok (footnotediv.children[1].style.display === 'none' &&  footnotediv.children[0].style.display === 'none', "footnote are no longer vidible on the page" );
     plus();
   });
+
   popped.play();
+
+});
+
+
+
+test("Overriding End Method", function () {
   
+  var popped = Popcorn("#video"),
+      expects = 3, 
+      count = 0,
+      footnotediv = document.getElementById('footnotediv');
+  
+  expect(expects);
+  
+  function plus() {
+    if ( ++count===expects) {
+      start();
+    }
+  }
+  
+  stop(15000);
+ 
+  popped.footnote({
+    start: 6, // seconds
+    end: false,
+    text: 'This one never goes away',
+    target: 'footnotediv'
+  } )  
+  .volume(0);
+
+  popped.exec( 7, function() {
+    equal (footnotediv.children[2].innerHTML, "This one never goes away", "innerHTML: This one never goes away 1" );
+    plus();
+  });
+
+  popped.exec( 10, function() {
+    popped.currentTime( popped.duration() - 3 );
+  });
+
+  popped.listen("ended", function() {
+    equal(footnotediv.children[2].style.display, "inline", "footnotediv.children[2].style.display:'inline'" );
+    plus();
+    equal(footnotediv.children[2].innerHTML, "This one never goes away", "innerHTML: This one never goes away 2 - OVERRIDE SUCCESSFUL" );
+    plus();
+  });
+
+  popped.play();
+
 });

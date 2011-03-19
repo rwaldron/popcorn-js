@@ -1052,6 +1052,76 @@ test("Remove Plugin", function () {
 });
 
 
+test("Plugin End Method Override", function () {
+  
+  var popped = Popcorn("#video"),
+      expects = 3, 
+      count = 0,
+      footnotediv = document.getElementById('footnote'), 
+      timeAt;
+  
+  expect(expects);
+  
+  function plus() {
+    if ( ++count===expects) {
+      start();
+
+      popped.currentTime(timeAt);
+    }
+  }
+
+  Popcorn.plugin( "footnote" , {
+    _setup: function(options) {
+      options._container = document.createElement( 'div' );
+      options._container.style.display = "none";
+      options._container.innerHTML  = options.text;
+      if ( document.getElementById( options.target ) ) {
+        document.getElementById( options.target ).appendChild( options._container );
+      }
+    },
+    start: function(event, options){
+      options._container.style.display = "inline";
+    },
+    end: function(event, options){
+      options._container.style.display = "none";
+    }
+   
+  });  
+  stop(15000);
+
+	timeAt = popped.currentTime();
+	
+  popped.footnote({
+    start: 6, // seconds
+    end: false,
+    text: 'This one never goes away',
+    target: 'footnote'
+  })  
+  .currentTime( 5 )
+  .volume( 0 );
+
+  popped.exec( 7, function() {
+    equal (footnotediv.children[0].innerHTML, "This one never goes away", "innerHTML: This one never goes away 1" );
+    plus();
+  });
+
+  popped.exec( 10, function() {
+    popped.currentTime( popped.duration() - 3 );
+  });
+
+  popped.listen("ended", function() {
+    equal(footnotediv.children[0].style.display, "inline", "footnotediv.children[2].style.display:'inline'" );
+    plus();
+    equal(footnotediv.children[0].innerHTML, "This one never goes away", "innerHTML: This one never goes away 2 - OVERRIDE SUCCESSFUL" );
+    plus();
+  });
+
+  popped.play();
+
+});
+
+
+
 
 
 test("Protected Names", function () {
@@ -1788,15 +1858,13 @@ test("Parsing Handler - References unavailable plugin", function () {
   function plus() {
     if ( ++count === expects ) {
       start();
-      // clean up added events after tests
-      clearInterval( interval );
       poppercore.removePlugin( "parserTest" );
     }
   }
   
   expect(expects);
   
-  stop();
+  stop(2000);
 
   Popcorn.parser( "parseJson", function( data ){
   
@@ -1806,13 +1874,12 @@ test("Parsing Handler - References unavailable plugin", function () {
   poppercore.parseJson("data/parseMissing.json");
 
   // interval used to wait for data to be parsed
-  interval = setInterval( function() {
-    poppercore.currentTime(5).play().currentTime(6);
-    
-    ok( true, "Ignored call to missing plugin " );
+  poppercore.exec( 28, function() {
+
+		ok( true, "Ignored call to missing plugin " );
     plus();
     
-  }, 2000);
+  }).currentTime(27).play();
   
 });
 

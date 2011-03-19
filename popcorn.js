@@ -187,7 +187,9 @@
                 previousTime   = that.data.trackEvents.previousUpdateTime,
                 tracks         = that.data.trackEvents,
                 tracksByEnd    = tracks.byEnd,
-                tracksByStart  = tracks.byStart;
+                tracksByStart  = tracks.byStart, 
+
+                trackEnd, trackStart;
 
             //  Playbar advancing
             if ( previousTime < currentTime ) {
@@ -197,7 +199,18 @@
                 if ( !tracksByEnd[ tracks.endIndex ]._natives || !!that[ tracksByEnd[ tracks.endIndex ]._natives.type ] ) {
                   if ( tracksByEnd[ tracks.endIndex ]._running === true ) {
                     tracksByEnd[ tracks.endIndex ]._running = false;
-                    tracksByEnd[ tracks.endIndex ]._natives.end.call( that, event, tracksByEnd[ tracks.endIndex ] );
+
+                    trackEnd = tracksByEnd[ tracks.endIndex ];
+
+                    if ( trackEnd.overrides && trackEnd.overrides.key ) {
+
+                      Popcorn.TrackEvents.overrides[ trackEnd.overrides.key ].end.call( that, event, trackEnd );
+
+                    } else {
+
+                      trackEnd._natives.end.call( that, event, trackEnd );
+
+                    }
                   }
                   tracks.endIndex++;
                 } else {
@@ -206,8 +219,9 @@
                   return;
                 }
               }
-              
+
               while ( tracksByStart[ tracks.startIndex ] && tracksByStart[ tracks.startIndex ].start <= currentTime ) {
+
                 //  If plugin does not exist on this instance, remove it
                 if ( !tracksByStart[ tracks.startIndex ]._natives || !!that[ tracksByStart[ tracks.startIndex ]._natives.type ] ) {
                   if ( tracksByStart[ tracks.startIndex ].end > currentTime && tracksByStart[ tracks.startIndex ]._running === false ) {
@@ -230,7 +244,18 @@
                 if ( !tracksByStart[ tracks.startIndex ]._natives || !!that[ tracksByStart[ tracks.startIndex ]._natives.type ] ) {
                   if ( tracksByStart[ tracks.startIndex ]._running === true ) {
                     tracksByStart[ tracks.startIndex ]._running = false;
-                    tracksByStart[ tracks.startIndex ]._natives.end.call( that, event, tracksByStart[ tracks.startIndex ] );
+
+                    trackStart = tracksByStart[ tracks.startIndex ];
+
+                    if ( trackStart.overrides && trackStart.overrides.key ) {
+
+                      Popcorn.TrackEvents.overrides[ trackStart.overrides.key ].end.call( that, event, trackStart );
+
+                    } else {
+
+                      trackStart._natives.end.call( that, event, trackStart );
+
+                    }
                   }
                   tracks.startIndex--;
                 } else {
@@ -553,6 +578,10 @@
 
   };
 
+  Popcorn.TrackEvents = {
+    overrides: {}
+  };
+
   //  removePlugin( type ) removes all tracks of that from all instances of popcorn
   //  removePlugin( obj, type ) removes all tracks of type from obj, where obj is a single instance of popcorn
   Popcorn.removePlugin = function( obj, name ) {
@@ -720,8 +749,8 @@
     //  the definition into Popcorn.p
     var reserved = [ "start", "end" ],
         plugin = {},
-        setup,
-        isfn = typeof definition === "function";
+        isfn = typeof definition === "function", 
+        setup;
 
     //  If `manifest` arg is undefined, check for manifest within the `definition` object
     //  If no `definition.manifest`, an empty object is a sufficient fallback
@@ -750,6 +779,31 @@
 
       if ( !( "end" in options ) ) {
         options.end = this.duration();
+      }
+
+      if ( options.end === false ) {
+
+        if ( !options.overrides ) {
+          options.overrides = {};
+        }
+
+        options.overrides.key = Popcorn.guid( "__overide" );
+
+        Popcorn.TrackEvents.overrides[ options.overrides.key ] = {
+          end: options.overrides.end || Popcorn.nop
+        };
+      }
+
+      if ( "overrides" in options && options.end === false ) {
+
+        if ( options.end !== false ) {
+          delete options.overrides.key;
+        }
+
+        if ( options.end === false ) {
+          options.end = this.duration();
+        }
+
       }
 
       //  If a _setup was declared, then call it before
