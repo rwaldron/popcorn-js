@@ -13,7 +13,7 @@ test( "Popcorn YouTube Plugin Event Tests", function() {
   // events must be fired in this order
   var expectedEvents = [
     'play',
-    'loadeddata',
+    'loadedmetadata',
     'playing',
     'volumechange',
     'pause',
