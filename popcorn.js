@@ -817,6 +817,7 @@
         return o;
       }
     }
+    return undefined;
   };
 
   Popcorn.getLastTrackEventId = function( obj ) {
