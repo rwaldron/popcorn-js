@@ -168,6 +168,9 @@
         // Store track event history data
         history: [],
 
+				// Store track event object references by trackId
+				trackRefs: {},
+
         // Playback track event queues
         trackEvents: {
           byStart: [{
@@ -662,7 +665,7 @@
     var byStart = obj.data.trackEvents.byStart,
         byEnd = obj.data.trackEvents.byEnd, 
         idx;
-   
+
     for ( idx = byStart.length-1; idx >= 0; idx-- ) {
 
       if ( track.start >= byStart[idx].start ) {
@@ -670,7 +673,7 @@
         break;
       }
     }
-   
+
     for ( idx = byEnd.length-1; idx >= 0; idx-- ) {
 
       if ( track.start >= byEnd[idx].start ) {
@@ -678,7 +681,6 @@
         break;
       }
     }
-
   };
 
   Popcorn.removeTrackEvent  = function( obj, trackId ) {
