@@ -896,6 +896,11 @@
 
       Popcorn.addTrackEvent( this, options );
 
+      if ( this.currentTime() > options.start && this.currentTime() < options.end ) {
+
+        options._natives.start.call( this, null, options );
+      }
+
       //  Future support for plugin event definitions
       //  for all of the native events
       Popcorn.forEach( setup, function( callback, type ) {
