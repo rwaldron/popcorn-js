@@ -502,7 +502,9 @@
       if ( Popcorn.isArray( plugin ) ) {
 
         Popcorn.forEach( plugin, function( obj ) {
-          this.defaults( obj.plugin, obj.options );
+          for ( var name in obj ) {
+            this.defaults( name, obj[ name ] );
+          }
         }, this );
 
         return this;

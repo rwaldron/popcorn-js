@@ -1100,14 +1100,12 @@ test("Configurable Defaults", function () {
     
   }).defaults([ 
     { 
-      plugin: "multiconfig", 
-      options: { 
+      multiconfig: { 
         target: "quux" 
       } 
     },
     { 
-      plugin: "configurable", 
-      options: { 
+      configurable: { 
         text: "bar",
         type: "thinger"
       } 
