@@ -483,11 +483,42 @@
 
       return this;
     },
+
+    // Get the client bounding box of an instance element
     position: function() {
       return Popcorn.position( this.media );
-    }, 
+    },
+
+    // Toggle a plugin's playback behaviour (on or off) per instance
     toggle: function( plugin ) {
       return Popcorn[ this.data.disabled.indexOf( plugin ) > -1 ? "enable" : "disable" ]( this, plugin );
+    }, 
+
+    // Set default values for plugin options objects per instance
+    defaults: function( plugin, defaults ) {
+
+      // If an array of default configurations is provided,
+      // iterate and apply each to this instance
+      if ( Popcorn.isArray( plugin ) ) {
+
+        Popcorn.forEach( plugin, function( obj ) {
+          this.defaults( obj.plugin, obj.options );
+        }, this );
+
+        return this;
+      }
+
+      if ( !this.options.defaults ) {
+        this.options.defaults = {};
+      }
+
+      if ( !this.options.defaults[ plugin ] ) {
+        this.options.defaults[ plugin ] = {};
+      }
+
+      Popcorn.extend( this.options.defaults[ plugin ], defaults );
+
+      return this;
     }
   });
 
@@ -647,6 +678,14 @@
 
   // Internal Only - Adds track events to the instance object
   Popcorn.addTrackEvent = function( obj, track ) {
+
+    // Determine if this track has default options set for it
+    // If so, apply them to the track object
+    if ( track._natives && track._natives.type &&
+        ( obj.options.defaults && obj.options.defaults[ track._natives.type ] ) ) {
+
+      track = Popcorn.extend( {}, obj.options.defaults[ track._natives.type ], track );
+    }
 
     if ( track._natives ) {
       //  Supports user defined track event id

@@ -433,8 +433,8 @@ test("Popcorn.[addTrackEvent | removeTrackEvent].ref()", function() {
   
   var popped = Popcorn("#video");
 
-	// Calling exec() will create tracks and added them to the
-	// trackreference internally
+  // Calling exec() will create tracks and added them to the
+  // trackreference internally
   popped.exec( 1, function() { /* ... */ });
   popped.exec( 3, function() { /* ... */ });
   popped.exec( 5, function() { /* ... */ });
@@ -1019,6 +1019,124 @@ test("Manifest", function () {
     target: "custom-target"
   });
 
+
+});
+
+test("Configurable Defaults", function () {
+  
+  var expects = 8,
+      count   = 0;
+
+  function plus() {
+    if ( ++count === expects ) {
+      start();
+      Popcorn.removePlugin( "configurable" );
+      Popcorn.removePlugin( "multiconfig" );
+      Popcorn.removePlugin( "overridden" );
+    }
+  }
+
+  stop();
+      
+  Popcorn.plugin( "configurable", function () {
+    return {
+      start: function( event, options ) {
+
+        // target: "foo"
+        // text: "bar"
+        // type: "thinger"      
+        equal( options.target, "foo", 'options.target, "foo"');
+        plus();
+        equal( options.text, "bar", 'options.text, "bar"');
+        plus();
+        equal( options.type, "thinger", 'options.type, "thinger"');
+        plus();
+      },
+      end: function( event, options ) {
+        ok( true, "end fired");
+        plus();
+      }
+    };
+  });
+
+  Popcorn.plugin( "multiconfig", function () {
+    return {
+      start: function( event, options ) {
+        equal( options.target, "quux", 'options.target, "quux"');
+        plus();
+      },
+      end: function( event, options ) {
+        ok( true, "end fired");
+        plus();
+      }
+    };
+  });
+
+  Popcorn.plugin( "overridden", function () {
+    return {
+      start: function( event, options ) {
+        equal( options.target, "custom", 'options.target, "custom"');
+        plus();
+      },
+      end: function( event, options ) {
+        ok( true, "end fired");
+        plus();
+      }
+    };
+  });
+
+  var p = Popcorn("#video", {
+            defaults: {
+              overridden: {
+                target: "default"
+              }
+            }
+          });
+
+  p.defaults( "configurable", {
+
+    // set a default element target id
+    target: "foo"
+    
+  }).defaults([ 
+    { 
+      plugin: "multiconfig", 
+      options: { 
+        target: "quux" 
+      } 
+    },
+    { 
+      plugin: "configurable", 
+      options: { 
+        text: "bar",
+        type: "thinger"
+      } 
+    } 
+  ]).configurable({
+
+    // all calls will have:
+    // target: "foo"
+    // text: "bar"
+    // type: "thinger"
+    start: 3,
+    end: 4
+
+  }).multiconfig({
+
+    // all calls will have:
+    // target: "quux"
+    start: 4,
+    end: 5
+    
+  }).overridden({
+
+    // has a default set
+    // we need limitless overriding
+    start: 4,
+    end: 5,
+    target: "custom"
+
+  }).currentTime( 2 ).play();
 
 });
 
