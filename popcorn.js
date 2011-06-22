@@ -518,8 +518,6 @@
         this.options.defaults[ plugin ] = {};
       }
 
-      console.log( plugin, defaults );
-
       Popcorn.extend( this.options.defaults[ plugin ], defaults );
 
       return this;
@@ -908,7 +906,8 @@
       options._running = false;
 
       // Store reference to defaults if defaults have been previously set
-      var defaults = this.options.defaults && this.options.defaults[ options._natives.type ];
+      var defaults = this.options.defaults && this.options.defaults[ options._natives.type ],
+        originalOpts, manifestOpts;
 
       //  Ensure a manifest object, an empty object is a sufficient fallback
       options._natives.manifest = manifest;
@@ -931,20 +930,26 @@
 
           //  Sometimes the manifest may be missing entirely
           //  or it has an options object that doesn't have a `target` property
+          manifestOpts = "options" in manifest && manifest.options;
 
-          var manifestopts = "options" in manifest && manifest.options;
+          // Store original options object as a restore point
+          originalOpts = options;
 
-          options.target = manifestopts && "target" in manifestopts && manifestopts.target;
+          options.target = manifestOpts && "target" in manifestOpts && manifestOpts.target;
+        }
 
-          // Always override with defaults if they exist
-          if ( defaults ) {
-            Popcorn.extend( options, defaults );
-          }
+        // Merge with defaults if they exist
+        if ( defaults ) {
+          Popcorn.extend( options, defaults );
         }
 
         setup._setup.call( this, options );
+
+        // Restore original options
+        options = originalOpts;
       }
 
+      // Create new track event
       Popcorn.addTrackEvent( this, options );
 
       //  Future support for plugin event definitions

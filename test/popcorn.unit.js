@@ -1024,7 +1024,7 @@ test("Manifest", function () {
 
 test("Configurable Defaults", function () {
   
-  var expects = 9,
+  var expects = 10,
       count   = 0;
 
   function plus() {
@@ -1091,7 +1091,10 @@ test("Configurable Defaults", function () {
   Popcorn.plugin( "overridden", function () {
     return {
       start: function( event, options ) {
-        equal( options.target, "custom", 'options.target, "custom"');
+        equal( options.text, "hello!", 'options.text, overriden with "hello!"');
+        plus();
+      
+        equal( options.target, "custom", 'options.target, overriden with "custom"');
         plus();
       },
       end: function( event, options ) {
@@ -1148,7 +1151,8 @@ test("Configurable Defaults", function () {
     // we need limitless overriding
     start: 4,
     end: 5,
-    target: "custom"
+    target: "custom",
+    text: "hello!"
 
   }).currentTime( 2 ).play();
 
