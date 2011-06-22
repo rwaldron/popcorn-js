@@ -681,15 +681,19 @@
   // Internal Only - Adds track events to the instance object
   Popcorn.addTrackEvent = function( obj, track ) {
 
+    if ( !track ) {
+      return;
+    }
+
     // Determine if this track has default options set for it
     // If so, apply them to the track object
-    if ( track._natives && track._natives.type &&
+    if ( track && track._natives && track._natives.type &&
         ( obj.options.defaults && obj.options.defaults[ track._natives.type ] ) ) {
 
       track = Popcorn.extend( {}, obj.options.defaults[ track._natives.type ], track );
     }
 
-    if ( track._natives ) {
+    if ( track && track._natives ) {
       //  Supports user defined track event id
       track._id = !track.id ? Popcorn.guid( track._natives.type ) : track.id;
 
@@ -906,7 +910,7 @@
       options._running = false;
 
       // Store reference to defaults if defaults have been previously set
-      var defaults = this.options.defaults && this.options.defaults[ options._natives.type ],
+      var defaults = this.options.defaults && this.options.defaults[ options._natives && options._natives.type ],
         originalOpts, manifestOpts;
 
       //  Ensure a manifest object, an empty object is a sufficient fallback

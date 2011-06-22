@@ -951,7 +951,7 @@ test("Manifest", function () {
   var p = Popcorn("#video"),
       expects = 5,
       run = 1,
-      count   = 0;
+      count = 0;
 
   function plus() {
     if ( ++count === expects ) {
@@ -961,20 +961,23 @@ test("Manifest", function () {
     }
   }
 
-  stop( 10000 );
+  expect(expects);
+  stop();
+
   Popcorn.plugin( "footnote" , function(){
     return {
       _setup: function( options ) {
+
         ok( options.target, "`options.target exists`" );
         plus();
 
         if ( run === 2 ) {
-          equals( options.target, 'custom-target', "Uses custom target if one is specified" );
+          equal( options.target, 'custom-target', "Uses custom target if one is specified" );
           plus();
         }
 
         if ( run === 1 ) {
-          equals( options.target, 'text-container', "Uses manifest target by default" );
+          equal( options.target, 'text-container', "Uses manifest target by default" );
           plus();
 
           run++;
@@ -986,9 +989,7 @@ test("Manifest", function () {
       end: function(event, options){
 
       }
-
     };
-
   },
   {
     about:{
@@ -1004,9 +1005,6 @@ test("Manifest", function () {
       target  : 'text-container'
     }
   });
-
-
-  expect(expects);
 
   equal( Popcorn.sizeOf( Popcorn.manifest ), 1, "One manifest stored" );
   plus();
