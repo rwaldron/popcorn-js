@@ -518,6 +518,8 @@
         this.options.defaults[ plugin ] = {};
       }
 
+      console.log( plugin, defaults );
+
       Popcorn.extend( this.options.defaults[ plugin ], defaults );
 
       return this;
@@ -905,6 +907,9 @@
       options._natives.type = name;
       options._running = false;
 
+      // Store reference to defaults if defaults have been previously set
+      var defaults = this.options.defaults && this.options.defaults[ options._natives.type ];
+
       //  Ensure a manifest object, an empty object is a sufficient fallback
       options._natives.manifest = manifest;
 
@@ -930,6 +935,11 @@
           var manifestopts = "options" in manifest && manifest.options;
 
           options.target = manifestopts && "target" in manifestopts && manifestopts.target;
+
+          // Always override with defaults if they exist
+          if ( defaults ) {
+            Popcorn.extend( options, defaults );
+          }
         }
 
         setup._setup.call( this, options );

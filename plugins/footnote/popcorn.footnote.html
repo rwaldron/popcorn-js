@@ -7,20 +7,22 @@
   <script src="popcorn.footnote.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      var p = Popcorn('#video')
-      .play() 
+      var p = Popcorn('#video');
+
+			console.log( p );
+      p.defaults("footnote", {
+      	target: 'footnotediv'
+      })
       .footnote({
         start: 5, // seconds
         end: 15, // seconds
-        text: 'This video made exclusively for drumbeat.org',
-        target: 'footnotediv'
+        text: 'This video made exclusively for drumbeat.org'
       } )
       .footnote({
         start: 20, // seconds
         end: 45, // seconds
-        text: 'Visit webmademovies.org for more details',
-        target: 'footnotediv'
-      } )
+        text: 'Visit webmademovies.org for more details'
+      }).play();
 
     }, false);
 
@@ -32,8 +34,8 @@
   <p> A footnote displaying 'Visit webmademovies.org for more details' will appear at 20 seconds and disappear at 45 seconds.</p>
   <div>
     <video id='video' 
-      controls preload='none' 
-      width= '250px'
+      controls preload='auto' 
+      width= '300px'
       poster="../../test/poster.png"> 
 
       <source id='mp4'

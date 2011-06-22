@@ -1024,7 +1024,7 @@ test("Manifest", function () {
 
 test("Configurable Defaults", function () {
   
-  var expects = 8,
+  var expects = 9,
       count   = 0;
 
   function plus() {
@@ -1040,6 +1040,11 @@ test("Configurable Defaults", function () {
       
   Popcorn.plugin( "configurable", function () {
     return {
+      _setup: function( options ) {
+
+        equal( options.target, "foo", 'options.target, "foo"');
+        plus();
+      },
       start: function( event, options ) {
 
         // target: "foo"
