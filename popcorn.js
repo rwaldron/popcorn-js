@@ -681,10 +681,6 @@
   // Internal Only - Adds track events to the instance object
   Popcorn.addTrackEvent = function( obj, track ) {
 
-    if ( !track ) {
-      return;
-    }
-
     // Determine if this track has default options set for it
     // If so, apply them to the track object
     if ( track && track._natives && track._natives.type &&
@@ -911,7 +907,7 @@
 
       // Store reference to defaults if defaults have been previously set
       var defaults = this.options.defaults && this.options.defaults[ options._natives && options._natives.type ],
-        originalOpts, manifestOpts;
+        originalOpts, manifestOpts, mergedSetupOpts;
 
       //  Ensure a manifest object, an empty object is a sufficient fallback
       options._natives.manifest = manifest;
@@ -925,36 +921,32 @@
         options.end = this.duration() || Number.MAX_VALUE;
       }
 
+      // Store original options object as a restore point
+      originalOpts = options;
+
       //  If a _setup was declared, then call it before
       //  the events commence
       if ( "_setup" in setup && typeof setup._setup === "function" ) {
 
+        // Merge with defaults if they exist, make sure per call is prioritized
+        mergedSetupOpts = defaults ? Popcorn.extend( {}, defaults, options ) :
+                            options;
+
         // Resolves 239, 241, 242
-        if ( !options.target ) {
+        if ( !mergedSetupOpts.target ) {
 
           //  Sometimes the manifest may be missing entirely
           //  or it has an options object that doesn't have a `target` property
           manifestOpts = "options" in manifest && manifest.options;
 
-          // Store original options object as a restore point
-          originalOpts = options;
-
-          options.target = manifestOpts && "target" in manifestOpts && manifestOpts.target;
+          mergedSetupOpts.target = manifestOpts && "target" in manifestOpts && manifestOpts.target;
         }
 
-        // Merge with defaults if they exist
-        if ( defaults ) {
-          Popcorn.extend( options, defaults );
-        }
-
-        setup._setup.call( this, options );
-
-        // Restore original options
-        options = originalOpts;
+        setup._setup.call( this, mergedSetupOpts );
       }
 
       // Create new track event
-      Popcorn.addTrackEvent( this, options );
+      Popcorn.addTrackEvent( this, originalOpts );
 
       //  Future support for plugin event definitions
       //  for all of the native events

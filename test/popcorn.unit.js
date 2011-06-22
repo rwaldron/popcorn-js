@@ -1022,7 +1022,7 @@ test("Manifest", function () {
 
 test("Configurable Defaults", function () {
   
-  var expects = 10,
+  var expects = 12,
       count   = 0;
 
   function plus() {
@@ -1040,7 +1040,7 @@ test("Configurable Defaults", function () {
     return {
       _setup: function( options ) {
 
-        equal( options.target, "foo", 'options.target, "foo"');
+        equal( options.target, "foo", 'options.target, "foo" in configurable _setup');
         plus();
       },
       start: function( event, options ) {
@@ -1048,11 +1048,11 @@ test("Configurable Defaults", function () {
         // target: "foo"
         // text: "bar"
         // type: "thinger"      
-        equal( options.target, "foo", 'options.target, "foo"');
+        equal( options.target, "foo", 'options.target, "foo" in configurable start');
         plus();
-        equal( options.text, "bar", 'options.text, "bar"');
+        equal( options.text, "bar", 'options.text, "bar" in configurable start');
         plus();
-        equal( options.type, "thinger", 'options.type, "thinger"');
+        equal( options.type, "thinger", 'options.type, "thinger" in configurable start');
         plus();
       },
       end: function( event, options ) {
@@ -1076,7 +1076,7 @@ test("Configurable Defaults", function () {
   Popcorn.plugin( "multiconfig", function () {
     return {
       start: function( event, options ) {
-        equal( options.target, "quux", 'options.target, "quux"');
+        equal( options.target, "quux", 'options.target, "quux" in multiconfig start');
         plus();
       },
       end: function( event, options ) {
@@ -1088,11 +1088,18 @@ test("Configurable Defaults", function () {
 
   Popcorn.plugin( "overridden", function () {
     return {
-      start: function( event, options ) {
-        equal( options.text, "hello!", 'options.text, overriden with "hello!"');
+    	_setup: function( options ) {
+        equal( options.text, "hello!", 'options.text, overriden with "hello!" in overridden _setup');
         plus();
       
-        equal( options.target, "custom", 'options.target, overriden with "custom"');
+        equal( options.target, "custom", 'options.target, overriden with "custom" in overridden _setup');
+        plus();
+    	},
+      start: function( event, options ) {
+        equal( options.text, "hello!", 'options.text, overriden with "hello!" in overridden start');
+        plus();
+      
+        equal( options.target, "custom", 'options.target, overriden with "custom" in overridden start');
         plus();
       },
       end: function( event, options ) {
