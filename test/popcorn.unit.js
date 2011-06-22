@@ -1057,6 +1057,17 @@ test("Configurable Defaults", function () {
         plus();
       }
     };
+  },
+  {
+    about:{
+      name: "Popcorn Configurable Plugin",
+      version: "0.0",
+      author: "Rick Waldron",
+      website: ""
+    },
+    options: {
+      target: "manifest"
+    }
   });
 
   Popcorn.plugin( "multiconfig", function () {
