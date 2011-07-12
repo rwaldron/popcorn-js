@@ -999,8 +999,8 @@
 
       // default to an empty string if no effect exists
       // split string into an array of effects
-      options.compose = options.compose && options.compose.split( " " ) || [];
-      options.effect = options.effect && options.effect.split( " " ) || [];
+      options.compose = ( options.compose && ( options.compose + "" ).split( " " ) ) || [];
+      options.effect = ( options.effect && ( options.effect + "" ).split( " " ) ) || [];
 
       // join the two arrays together
       options.compose = options.compose.concat( options.effect );
