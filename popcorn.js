@@ -28,6 +28,18 @@
     }
   },
 
+  requestAnimFrame = (function(){
+    // shim from http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+    return global.requestAnimationFrame       || 
+      global.webkitRequestAnimationFrame || 
+      global.mozRequestAnimationFrame    || 
+      global.oRequestAnimationFrame      || 
+      global.msRequestAnimationFrame     || 
+      function(/* function */ callback, /* DOMElement */ element){
+        global.setTimeout(callback, 16);
+      };
+  }()),
+
   //  Declare constructor
   //  Returns an instance object.
   Popcorn = function( entity, options ) {
@@ -184,6 +196,7 @@
             start: -1,
             end: -1
           }],
+          animating:[],
           startIndex: 0,
           endIndex:   0,
           previousUpdateTime: 0
@@ -206,8 +219,7 @@
             end: videoDurationPlus
           });
 
-          that.media.addEventListener( "timeupdate", function( event ) {
-
+          var updateTrackEvents = function ( event ) {
             var currentTime    = this.currentTime,
                 previousTime   = that.data.trackEvents.previousUpdateTime,
                 tracks         = that.data.trackEvents,
@@ -288,8 +300,20 @@
             }
 
             tracks.previousUpdateTime = currentTime;
+          };
 
-          }, false );
+          var animateLoop = function () {
+            updateTrackEvents( null );
+            requestAnimFrame(animateLoop);
+          };
+
+          if ( this.options.frameAnimation ) {
+            animateLoop();
+          } else {
+            that.media.addEventListener( "timeupdate", function( event ) {
+              updateTrackEvents( event );
+            }, false );
+          }
         } else {
           global.setTimeout(function() {
             isReady( that );
