@@ -220,7 +220,7 @@
           });
 
           var updateTrackEvents = function ( event ) {
-            var currentTime    = this.currentTime,
+            var currentTime    = that.media.currentTime,
                 previousTime   = that.data.trackEvents.previousUpdateTime,
                 tracks         = that.data.trackEvents,
                 tracksByEnd    = tracks.byEnd,
@@ -307,7 +307,7 @@
             requestAnimFrame(animateLoop);
           };
 
-          if ( this.options.frameAnimation ) {
+          if ( that.options.frameAnimation ) {
             animateLoop();
           } else {
             that.media.addEventListener( "timeupdate", function( event ) {
