@@ -1809,6 +1809,27 @@ test( "Popcorn Compose", function () {
   popped.currentTime( 0 ).play();
 });
 
+test( "Popcorn Compose property handler", function () {
+
+  var popped = Popcorn("#video");
+
+  expect( 1 );
+
+  Popcorn.plugin( "testPlugin", {});
+
+  try {
+    popped.testPlugin({
+      compose: 2
+    });
+
+    ok( true, "compose property handles non-string args");
+  } catch(e) {
+    ok( false, "compose property handles non-string args");
+  }
+
+  Popcorn.removePlugin("testPlugin");
+});
+
 test("Plugin Breaker", function () {
 
   QUnit.reset();
