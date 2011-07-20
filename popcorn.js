@@ -410,6 +410,11 @@
         disabled.push( plugin );
       }
 
+      instance.trigger( "timeupdate", {
+        name: plugin,
+        state: "disabled"
+      });
+
       return instance;
     },
     enable: function( instance, plugin ) {
@@ -420,6 +425,11 @@
       if ( index > -1 ) {
         disabled.splice( index, 1 );
       }
+
+      instance.trigger( "timeupdate", {
+        name: plugin,
+        state: "enabled"
+      });
 
       return instance;
     }
@@ -618,6 +628,8 @@
             evt = document.createEvent( eventInterface );
             evt.initEvent( type, true, true, global, 1 );
 
+            evt.customData = data;
+
             this.media.dispatchEvent( evt );
 
             return this;
@@ -690,7 +702,7 @@
 
             Popcorn.forEach( self.data.events[ type ], function( obj, key ) {
               if ( typeof obj === "function" ) {
-                obj.call( self, event );
+                obj.call( self, event, event.customData || {} );
               }
             });
 
