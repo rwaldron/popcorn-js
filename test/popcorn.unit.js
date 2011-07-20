@@ -2489,7 +2489,6 @@ test("Popcorn.disable/enable/toggle", function() {
 
   stop( 10000 );
 });
-
 test("Popcorn.disable/enable/toggle triggers timeupdate", function() {
 
   var $pop = Popcorn( "#video" ),
