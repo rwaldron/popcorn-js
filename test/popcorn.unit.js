@@ -3224,6 +3224,9 @@ test("Last Check", function () {
 
   } catch (e) {};
 
+  Popcorn("#video").mute();
+  Popcorn("#audio").mute();
+
   //  Trigger follow-up tests to run in iframes
   (function( $ ) {
 
