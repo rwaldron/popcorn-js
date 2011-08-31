@@ -2699,6 +2699,52 @@ test("Popcorn.disable/enable/toggle", function() {
   stop( 10000 );
 });
 
+
+test("Popcorn.disable/enable/toggle triggers timeupdate", function() {
+
+  var $pop = Popcorn( "#video" ),
+      tests = [ "disabled", "enabled", "disabled" ],
+      count = 0,
+      expects = 6;
+
+  expect( expects );
+
+  function plus() {
+    if ( ++count === expects ) {
+      start();
+      Popcorn.removeInstance( $pop );
+    }
+  }
+
+  stop( 5000 );
+
+  Popcorn.plugin( "toggler", function () {
+    return {
+      start: function () {},
+      end: function () {}
+    };
+  });
+
+  $pop.toggler({
+    start: 40,
+    end: 50
+  });
+
+  $pop.listen( "timeupdate", function( event, data ) {
+
+    if ( data.name && data.state ) {
+      ok( true, "`timeupdate` event fired");
+      plus();
+
+      equal( data.state, tests.shift(), "Received correct data");
+      plus();
+    }
+  });
+
+  $pop.disable( "toggler" ).enable( "toggler" ).toggle( "toggler" );
+  // Order: "disabled", "enabled", "disabled"
+});
+
 module("Popcorn XHR");
 test("Basic", function () {
 
