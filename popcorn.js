@@ -1,3 +1,6 @@
+
+
+
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -784,7 +787,7 @@
         break;
       }
     }
-    
+
     this.timeUpdate( obj, null );
 
     // Store references to user added trackevents in ref table
