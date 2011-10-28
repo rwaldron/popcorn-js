@@ -1975,6 +1975,84 @@ test( "Update Timer (frameAnimation)", function() {
   p2.currentTime( 3 ).play();
 });
 
+test( "Throttle-down timer when paused (frameAnimation)", function() {
+
+  var $pop = Popcorn( "#video", { frameAnimation: true }),
+      count = 0,
+      expects = 3,
+      frames = 0,
+      saved = 0;
+
+  expect( expects );
+
+  function plus() {
+    if ( ++count === expects ) {
+      $pop.destroy();
+      start();
+    }
+  }
+
+  stop();
+
+  // When media is ready, jump to 1s and start playing
+  // At 2s, pause and save the current frame count.
+  // Allow pause to hold for long enough to make a testable difference,
+  // by creating setTimeout for 500ms.
+  // After 1 second has passed, test that frames === saved
+  // If the throttle worked correctly, they should match
+  // Allow to play for 1 more second, retest that frames > saved
+  // If throttle worked correctly, frames will have been incremented
+
+
+	$pop.listen( "timeupdate", function() {
+
+		var time = this.currentTime();
+
+		if ( time < 3 && time > 2 ) {
+			this.data.state.playing = false;
+		}
+
+		if ( time < 4 && time > 3 ) {
+			this.data.state.playing = true;
+		}
+
+
+	}).play( 1 );
+
+
+
+	//   $pop.exec( 2, function() {
+	//
+	//     saved = frames;
+	//
+	// 	this.data.state.playing = false;
+	//
+	// 	console.log( "2" );
+	//
+	//     notEqual( frames, 0, "frames have been incremented" );
+	//     plus();
+	//   });
+	//
+	// $pop.exec( 3, function() {
+	//
+	//
+	// 	console.log( "3" );
+	// 	ok( frames === saved, "frames did not increment during time paused" );
+	//     plus();
+	//
+	// 	this.data.state.playing = true;
+	// })
+	//
+	// $pop.exec( 4, function() {
+	//
+	// 	console.log( "4" );
+	// 	equal( frames, saved, "frames did not increment during time paused" );
+	//     plus();
+	// });
+
+  $pop.play( 1 );
+});
+
 test( "timeUpdate add track event while paused", function() {
 
   var $pop = Popcorn( "#video" ),

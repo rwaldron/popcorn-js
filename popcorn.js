@@ -84,7 +84,6 @@
 
       //  Supports Popcorn(function () { /../ })
       //  Originally proposed by Daniel Brooks
-
       if ( typeof entity === "function" ) {
 
         //  If document ready has already fired
@@ -161,8 +160,12 @@
 
         // Stores ad-hoc state related data]
         state: {
-          volume: this.media.volume
+          volume: this.media.volume,
+					playing: this.media.autoplay ? true : false
         },
+
+        // Executed by timeupdate event or in rAF loop
+        timeUpdate: Popcorn.nop,
 
         // Store track event object references by trackId
         trackRefs: {},
@@ -188,7 +191,7 @@
       //  Wrap true ready check
       var isReady = function( that ) {
 
-        var duration, videoDurationPlus, animate;
+        var duration, videoDurationPlus;
 
         if ( that.media.readyState >= 2 ) {
           //  Adding padding to the front and end of the arrays
@@ -208,25 +211,27 @@
             //  requestAnimFrame is used instead of "timeupdate" media event.
             //  This is for greater frame time accuracy, theoretically up to
             //  60 frames per second as opposed to ~4 ( ~every 15-250ms)
-            animate = function () {
+            that.data.timeUpdate = function () {
 
               Popcorn.timeUpdate( that, {} );
-
               that.trigger( "timeupdate" );
 
-              requestAnimFrame( animate );
+              // If media is paused, there is no reason to continue
+              // calling timeUpdate callbacks
+//              if ( that.data.state.playing ) {
+                requestAnimFrame( that.data.timeUpdate );
+//              }
             };
 
-            requestAnimFrame( animate );
-
+            requestAnimFrame( that.data.timeUpdate );
           } else {
 
-            that.data.timeUpdateFunction = function( event ) {
+            that.data.timeUpdate = function( event ) {
               Popcorn.timeUpdate( that, event );
             };
 
             if ( !that.isDestroyed ) {
-              that.media.addEventListener( "timeupdate", that.data.timeUpdateFunction, false );
+              that.media.addEventListener( "timeupdate", that.data.timeUpdate, false );
             }
           }
         } else {
@@ -384,7 +389,7 @@
       }
 
       if ( !instance.isDestroyed ) {
-        instance.media.removeEventListener( "timeupdate", instance.data.timeUpdateFunction, false );
+        instance.media.removeEventListener( "timeupdate", instance.data.timeUpdate, false );
         instance.isDestroyed = true;
       }
     }
@@ -414,10 +419,35 @@
             // If arg is not null or undefined and called by one of the
             // allowed shorthandable methods, then set the currentTime
             // Supports time as seconds or SMPTE
-            if ( arg != null && /play|pause/.test( name ) ) {
-              this.media.currentTime = Popcorn.util.toSeconds( arg );
+            if ( /play|pause/.test( name ) ) {
+
+							if ( arg != null ) {
+								this.media.currentTime = Popcorn.util.toSeconds( arg );
+							}
+
+
+							console.log( name, this.data.state );
+	            // If play() is called on media that has set the
+	            // `frameAnimation` option to true, kickstart the rAF loop
+	            if ( name === "play" ) {
+
+								// Set internal playing state to true
+								this.data.state.playing = true;
+
+								// `frameAnimation` option to true, kickstart the rAF loop
+								if ( this.options.frameAnimation ) {
+									this.data.timeUpdate();
+									requestAnimFrame( this.data.timeUpdate );
+								}
+	            }
+
+							if ( name === "pause" ) {
+								// Set internal playing state to false
+								this.data.state.playing = false;
+							}
             }
 
+            // Passthrough to host media object's matching method
             this.media[ name ]();
 
             return this;
@@ -2046,7 +2076,7 @@
 
   //  Protected API methods
   Popcorn.protect = {
-    natives: getItems() 
+    natives: getItems()
   };
 
   //  Exposes Popcorn to global context
