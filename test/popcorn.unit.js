@@ -1987,7 +1987,7 @@ test( "Throttle-down timer when paused (frameAnimation)", function() {
 
   function plus() {
     if ( ++count === expects ) {
-      $pop.destroy();
+      $pop.removePlugin("exec").destroy();
       start();
     }
   }
@@ -2003,52 +2003,46 @@ test( "Throttle-down timer when paused (frameAnimation)", function() {
   // Allow to play for 1 more second, retest that frames > saved
   // If throttle worked correctly, frames will have been incremented
 
-
-	$pop.listen( "timeupdate", function() {
-
-		var time = this.currentTime();
-
-		if ( time < 3 && time > 2 ) {
-			this.data.state.playing = false;
-		}
-
-		if ( time < 4 && time > 3 ) {
-			this.data.state.playing = true;
-		}
+  var timeUpdate = $pop.data.timeUpdate;
 
 
-	}).play( 1 );
+  $pop.data.timeUpdate = function() {
+
+    console.log( frames++ );
+
+    timeUpdate();
+  };
 
 
 
-	//   $pop.exec( 2, function() {
-	//
-	//     saved = frames;
-	//
-	// 	this.data.state.playing = false;
-	//
-	// 	console.log( "2" );
-	//
-	//     notEqual( frames, 0, "frames have been incremented" );
-	//     plus();
-	//   });
-	//
-	// $pop.exec( 3, function() {
-	//
-	//
-	// 	console.log( "3" );
-	// 	ok( frames === saved, "frames did not increment during time paused" );
-	//     plus();
-	//
-	// 	this.data.state.playing = true;
-	// })
-	//
-	// $pop.exec( 4, function() {
-	//
-	// 	console.log( "4" );
-	// 	equal( frames, saved, "frames did not increment during time paused" );
-	//     plus();
-	// });
+  $pop.exec( 2, function() {
+
+    saved = frames;
+
+    this.data.state.playing = false;
+
+    notEqual( frames, 0, "frames have been incremented" );
+    plus();
+  });
+
+  // Not firing??
+  $pop.exec( 3, function() {
+
+
+    console.log( "3" );
+    ok( frames === saved, "frames did not increment during time paused" );
+    plus();
+
+    this.data.state.playing = true;
+  })
+
+  // Not firing??
+  $pop.exec( 4, function() {
+
+    console.log( "4" );
+    equal( frames, saved, "frames did not increment during time paused" );
+    plus();
+  });
 
   $pop.play( 1 );
 });

@@ -161,7 +161,7 @@
         // Stores ad-hoc state related data]
         state: {
           volume: this.media.volume,
-					playing: this.media.autoplay ? true : false
+          playing: this.media.autoplay ? true : false
         },
 
         // Executed by timeupdate event or in rAF loop
@@ -218,9 +218,9 @@
 
               // If media is paused, there is no reason to continue
               // calling timeUpdate callbacks
-//              if ( that.data.state.playing ) {
+              if ( that.data.state.playing ) {
                 requestAnimFrame( that.data.timeUpdate );
-//              }
+              }
             };
 
             requestAnimFrame( that.data.timeUpdate );
@@ -421,30 +421,27 @@
             // Supports time as seconds or SMPTE
             if ( /play|pause/.test( name ) ) {
 
-							if ( arg != null ) {
-								this.media.currentTime = Popcorn.util.toSeconds( arg );
-							}
+              if ( arg != null ) {
+                this.media.currentTime = Popcorn.util.toSeconds( arg );
+              }
 
+              // If play() is called on media that has set the
+              // `frameAnimation` option to true, kickstart the rAF loop
+              if ( name === "play" ) {
 
-							console.log( name, this.data.state );
-	            // If play() is called on media that has set the
-	            // `frameAnimation` option to true, kickstart the rAF loop
-	            if ( name === "play" ) {
+                // Set internal playing state to true
+                this.data.state.playing = true;
 
-								// Set internal playing state to true
-								this.data.state.playing = true;
+                // `frameAnimation` option to true, kickstart the rAF loop
+                if ( this.options.frameAnimation ) {
+                  requestAnimFrame( this.data.timeUpdate );
+                }
+              }
 
-								// `frameAnimation` option to true, kickstart the rAF loop
-								if ( this.options.frameAnimation ) {
-									this.data.timeUpdate();
-									requestAnimFrame( this.data.timeUpdate );
-								}
-	            }
-
-							if ( name === "pause" ) {
-								// Set internal playing state to false
-								this.data.state.playing = false;
-							}
+              if ( name === "pause" ) {
+                // Set internal playing state to false
+                this.data.state.playing = false;
+              }
             }
 
             // Passthrough to host media object's matching method
