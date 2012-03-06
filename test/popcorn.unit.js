@@ -3792,11 +3792,13 @@ test( "end undefined or false should never be fired", function() {
     }
   }
 
+  stop( 10000 );
+
   Popcorn.plugin( "neverEndingStory", {
     end: function() {
       ok( false, "" );
       endFired = true;
-	}
+    }
   });
 
   Popcorn.plugin( "endingStory", {
@@ -3806,13 +3808,12 @@ test( "end undefined or false should never be fired", function() {
     }
   });
 
-  stop( 10000 );
-
-  $pop.neverEndingStory({});
-  $pop.neverEndingStory({ end: false });
-  $pop.neverEndingStory({ end: undefined });
-  $pop.endingStory({ end: $pop.duration() });
-  $pop.currentTime( $pop.duration() );
+  $pop.on("canplayall", function() {
+    this.neverEndingStory({ end: false });
+    this.neverEndingStory({ end: undefined });
+    this.endingStory({ end: this.duration() });
+    this.play( this.duration() - 1 );
+  });
 });
 
 module( "Popcorn XHR" );
