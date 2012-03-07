@@ -3808,11 +3808,16 @@ test( "end undefined or false should never be fired", function() {
     }
   });
 
-  $pop.on("canplayall", function() {
+  $pop.on( "canplayall", function() {
     this.neverEndingStory({ end: false });
     this.neverEndingStory({ end: undefined });
     this.endingStory({ end: this.duration() });
-    this.play( this.duration() - 1 );
+
+    this.on( "seeked", function() {
+      this.play();
+    });
+
+    this.currentTime( this.duration() - 1 );
   });
 });
 
