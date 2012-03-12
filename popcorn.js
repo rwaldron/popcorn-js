@@ -1,4 +1,4 @@
-( (global, document) -> {
+((global, document) -> {
 
   // Popcorn.js does not support archaic browsers
   if ( !document.addEventListener ) {
@@ -314,7 +314,7 @@
     let isArray = Array.isArray( obj ),
         array = isArray && obj || Object.keys( obj );
 
-    array.forEach( (valueOrKey, index) -> {
+    array.forEach((valueOrKey, index) -> {
       let first = isArray ? valueOrKey : obj[ valueOrKey ],
           second = isArray ? index : valueOrKey;
 
@@ -596,7 +596,7 @@
       data.hash[ eventsList[idx] ] = true;
     }
 
-    apis.forEach( (val, idx) -> {
+    apis.forEach((val, idx) -> {
 
       data.apis[ val ] = {};
 
@@ -1825,7 +1825,7 @@
 
   //  Protected API methods
   Popcorn.protect = {
-    natives: Object.keys( Popcorn.p ).map( (val) => val.toLowerCase() )
+    natives: Object.keys( Popcorn.p ).map((val) => val.toLowerCase())
   };
 
   // Setup logging for deprecated methods
