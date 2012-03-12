@@ -266,7 +266,7 @@
           //  requestAnimFrame is used instead of "timeupdate" media event.
           //  This is for greater frame time accuracy, theoretically up to
           //  60 frames per second as opposed to ~4 ( ~every 15-250ms)
-          this.data.timeUpdate = () => do {
+          this.data.timeUpdate = () => {
 
             Popcorn.timeUpdate( this, {} );
 
@@ -279,7 +279,9 @@
 
         } else {
 
-          this.data.timeUpdate = ( event ) => Popcorn.timeUpdate( this, event );
+          this.data.timeUpdate = ( event ) => {
+            Popcorn.timeUpdate( this, event );
+          };
 
           if ( !this.isDestroyed ) {
             this.media.addEventListener( "timeupdate", this.data.timeUpdate, false );
