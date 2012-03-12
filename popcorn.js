@@ -1,4 +1,4 @@
-(function(global, document) {
+( (global, document) -> {
 
   // Popcorn.js does not support archaic browsers
   if ( !document.addEventListener ) {
@@ -6,18 +6,18 @@
       isSupported: false
     };
 
-    var methods = ( "removeInstance addInstance getInstanceById removeInstanceById " +
-          "forEach extend effects error guid sizeOf isArray nop position disable enable destroy" +
+    let methods = ( "removeInstance addInstance getInstanceById removeInstanceById " +
+          "forEach extend effects error guid sizeOf nop position disable enable destroy" +
           "addTrackEvent removeTrackEvent getTrackEvents getTrackEvent getLastTrackEventId " +
           "timeUpdate plugin removePlugin compose effect xhr getJSONP getScript" ).split(/\s+/);
 
     while ( methods.length ) {
-      global.Popcorn[ methods.shift() ] = function() {};
+      global.Popcorn[ methods.shift() ] = () => void 0;
     }
     return;
   }
 
-  var
+  let
 
   AP = Array.prototype,
   OP = Object.prototype,
@@ -48,34 +48,17 @@
 
   //  Non-public `requestAnimFrame`
   //  http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-  requestAnimFrame = (function(){
-    return global.requestAnimationFrame ||
-      global.webkitRequestAnimationFrame ||
-      global.mozRequestAnimationFrame ||
-      global.oRequestAnimationFrame ||
-      global.msRequestAnimationFrame ||
-      function( callback, element ) {
-        global.setTimeout( callback, 16 );
-      };
-  }()),
+  requestAnimFrame = global.requestAnimationFrame ||
+    global.webkitRequestAnimationFrame ||
+    global.mozRequestAnimationFrame ||
+    global.oRequestAnimationFrame ||
+    global.msRequestAnimationFrame ||
+    ( callback, element ) -> {
+      global.setTimeout( callback, 16 );
+    },
 
-  //  Non-public `getKeys`, return an object's keys as an array
-  getKeys = function( obj ) {
-    return Object.keys ? Object.keys( obj ) : (function( obj ) {
-      var item,
-          list = [];
-
-      for ( item in obj ) {
-        if ( hasOwn.call( obj, item ) ) {
-          list.push( item );
-        }
-      }
-      return list;
-    })( obj );
-  },
-
-  refresh = function( obj ) {
-    var currentTime = obj.media.currentTime,
+  refresh = ( obj ) -> {
+    let currentTime = obj.media.currentTime,
       animation = obj.options.frameAnimation,
       disabled = obj.data.disabled,
       tracks = obj.data.trackEvents,
@@ -131,7 +114,7 @@
 
   //  Declare constructor
   //  Returns an instance object.
-  Popcorn = function( entity, options ) {
+  Popcorn = ( entity, options ) -> {
     //  Return new Popcorn object
     return new Popcorn.p.init( entity, options || null );
   };
@@ -149,10 +132,9 @@
   //  the new prototype for our Popcorn constructor
   Popcorn.p = Popcorn.prototype = {
 
-    init: function( entity, options ) {
+    init: ( entity, options ) -> {
 
-      var matches,
-          self = this;
+      let matches;
 
       //  Supports Popcorn(function () { /../ })
       //  Originally proposed by Daniel Brooks
@@ -175,7 +157,7 @@
           //  set readyBound flag
           readyBound = true;
 
-          var DOMContentLoaded  = function() {
+          let DOMContentLoaded = () -> {
 
             readyFired = true;
 
@@ -183,7 +165,7 @@
             document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
 
             //  Execute all ready function in the stack
-            for ( var i = 0, readyStackLength = readyStack.length; i < readyStackLength; i++ ) {
+            for ( let i = 0, readyStackLength = readyStack.length; i < readyStackLength; i++ ) {
 
               readyStack[ i ].call( document, Popcorn );
 
@@ -261,58 +243,58 @@
       };
 
       //  function to fire when video is ready
-      var isReady = function() {
+      let isReady = () => do {
 
-        self.media.removeEventListener( "loadeddata", isReady, false );
+        this.media.removeEventListener( "loadeddata", isReady, false );
 
-        var duration, videoDurationPlus;
+        let duration, videoDurationPlus;
 
         //  Adding padding to the front and end of the arrays
         //  this is so we do not fall off either end
-        duration = self.media.duration;
+        duration = this.media.duration;
 
         //  Check for no duration info (NaN)
         videoDurationPlus = duration != duration ? Number.MAX_VALUE : duration + 1;
 
-        Popcorn.addTrackEvent( self, {
+        Popcorn.addTrackEvent( this, {
           start: videoDurationPlus,
           end: videoDurationPlus
         });
 
-        if ( self.options.frameAnimation ) {
+        if ( this.options.frameAnimation ) {
           //  if Popcorn is created with frameAnimation option set to true,
           //  requestAnimFrame is used instead of "timeupdate" media event.
           //  This is for greater frame time accuracy, theoretically up to
           //  60 frames per second as opposed to ~4 ( ~every 15-250ms)
-          self.data.timeUpdate = function () {
+          this.data.timeUpdate = () => do {
 
-            Popcorn.timeUpdate( self, {} );
+            Popcorn.timeUpdate( this, {} );
 
-            self.emit( "timeupdate" );
+            this.emit( "timeupdate" );
 
-            !self.isDestroyed && requestAnimFrame( self.data.timeUpdate );
+            !this.isDestroyed && requestAnimFrame( this.data.timeUpdate );
           };
 
-          !self.isDestroyed && requestAnimFrame( self.data.timeUpdate );
+          !this.isDestroyed && requestAnimFrame( this.data.timeUpdate );
 
         } else {
 
-          self.data.timeUpdate = function( event ) {
-            Popcorn.timeUpdate( self, event );
+          this.data.timeUpdate = ( event ) => do {
+            Popcorn.timeUpdate( this, event );
           };
 
-          if ( !self.isDestroyed ) {
-            self.media.addEventListener( "timeupdate", self.data.timeUpdate, false );
+          if ( !this.isDestroyed ) {
+            this.media.addEventListener( "timeupdate", this.data.timeUpdate, false );
           }
         }
       };
 
-      if ( self.media.readyState >= 2 ) {
+      if ( this.media.readyState >= 2 ) {
 
         isReady();
       } else {
 
-        self.media.addEventListener( "loadeddata", isReady, false );
+        this.media.addEventListener( "loadeddata", isReady, false );
       }
 
       return this;
@@ -323,41 +305,30 @@
   //  Allows chaining methods to instances
   Popcorn.p.init.prototype = Popcorn.p;
 
-  Popcorn.forEach = function( obj, fn, context ) {
+  Popcorn.forEach = ( obj, fn, context ) -> {
 
     if ( !obj || !fn ) {
-      return {};
+      return;
     }
 
     context = context || this;
 
-    var key, len;
+    let isArray = Array.isArray( obj ),
+        array = isArray && obj || Object.keys( obj );
 
-    // Use native whenever possible
-    if ( forEach && obj.forEach === forEach ) {
-      return obj.forEach( fn, context );
-    }
+    array.forEach( (valueOrKey, index) -> {
+      let first = isArray ? valueOrKey : obj[ valueOrKey ],
+          second = isArray ? index : valueOrKey;
 
-    if ( toString.call( obj ) === "[object NodeList]" ) {
-      for ( key = 0, len = obj.length; key < len; key++ ) {
-        fn.call( context, obj[ key ], key, obj );
-      }
-      return obj;
-    }
-
-    for ( key in obj ) {
-      if ( hasOwn.call( obj, key ) ) {
-        fn.call( context, obj[ key ], key, obj );
-      }
-    }
-    return obj;
+      iterator.call( context, first, second, obj );
+    }, context);
   };
 
-  Popcorn.extend = function( obj ) {
-    var dest = obj, src = slice.call( arguments, 1 );
+  Popcorn.extend = ( ...args ) -> {
+    let dest = args.shift();
 
-    Popcorn.forEach( src, function( copy ) {
-      for ( var prop in copy ) {
+    Popcorn.forEach( args, ( copy ) -> {
+      for ( let prop in copy ) {
         dest[ prop ] = copy[ prop ];
       }
     });
@@ -368,7 +339,7 @@
 
   // A Few reusable utils, memoized onto Popcorn
   Popcorn.extend( Popcorn, {
-    noConflict: function( deep ) {
+    noConflict: ( deep ) -> {
 
       if ( deep ) {
         global.Popcorn = _Popcorn;
@@ -376,31 +347,28 @@
 
       return Popcorn;
     },
-    error: function( msg ) {
+    error: ( msg ) -> {
       throw new Error( msg );
     },
-    guid: function( prefix ) {
+    guid: ( prefix ) -> {
       Popcorn.guid.counter++;
       return  ( prefix ? prefix : "" ) + ( +new Date() + Popcorn.guid.counter );
     },
-    sizeOf: function( obj ) {
-      var size = 0;
+    sizeOf: ( obj ) -> {
+      let size = 0;
 
-      for ( var prop in obj ) {
+      for ( let prop in obj ) {
         size++;
       }
 
       return size;
     },
-    isArray: Array.isArray || function( array ) {
-      return toString.call( array ) === "[object Array]";
-    },
 
-    nop: function() {},
+    nop: () -> void 0,
 
-    position: function( elem ) {
+    position: ( elem ) -> {
 
-      var clientRect = elem.getBoundingClientRect(),
+      let clientRect = elem.getBoundingClientRect(),
           bounds = {},
           doc = elem.ownerDocument,
           docElem = document.documentElement,
@@ -419,16 +387,16 @@
       top = Math.ceil( clientRect.top + scrollTop - clientTop );
       left = Math.ceil( clientRect.left + scrollLeft - clientLeft );
 
-      for ( var p in clientRect ) {
+      for ( let p in clientRect ) {
         bounds[ p ] = Math.round( clientRect[ p ] );
       }
 
       return Popcorn.extend({}, bounds, { top: top, left: left });
     },
 
-    disable: function( instance, plugin ) {
+    disable: ( instance, plugin ) -> {
 
-      var disabled = instance.data.disabled;
+      let disabled = instance.data.disabled;
 
       if ( disabled.indexOf( plugin ) === -1 ) {
         disabled.push( plugin );
@@ -438,9 +406,8 @@
 
       return instance;
     },
-    enable: function( instance, plugin ) {
-
-      var disabled = instance.data.disabled,
+    enable: ( instance, plugin ) -> {
+      let disabled = instance.data.disabled,
           index = disabled.indexOf( plugin );
 
       if ( index > -1 ) {
@@ -451,17 +418,13 @@
 
       return instance;
     },
-    destroy: function( instance ) {
-      var events = instance.data.events,
+    destroy: ( instance ) -> {
+      let events = instance.data.events,
           singleEvent, item, fn;
 
       //  Iterate through all events and remove them
-      for ( item in events ) {
-        singleEvent = events[ item ];
-        for ( fn in singleEvent ) {
-          delete singleEvent[ fn ];
-        }
-        events[ item ] = null;
+      for ( singleEvent of events ) {
+        singleEvent = void 0;
       }
 
       if ( !instance.isDestroyed ) {
@@ -477,17 +440,17 @@
   //  Factory to implement getters, setters and controllers
   //  as Popcorn instance methods. The IIFE will create and return
   //  an object with defined methods
-  Popcorn.extend(Popcorn.p, (function() {
+  Popcorn.extend(Popcorn.p, (() -> {
 
-      var methods = "load play pause currentTime playbackRate volume duration preload playbackRate " +
+      let methods = "load play pause currentTime playbackRate volume duration preload playbackRate " +
                     "autoplay loop controls muted buffered readyState seeking paused played seekable ended",
           ret = {};
 
 
       //  Build methods, store in object that is returned and passed to extend
-      Popcorn.forEach( methods.split( /\s+/g ), function( name ) {
+      Popcorn.forEach( methods.split( /\s+/g ), ( name ) -> {
 
-        ret[ name ] = function( arg ) {
+        ret[ name ] = ( arg ) -> {
 
           if ( typeof this.media[ name ] === "function" ) {
 
@@ -521,21 +484,17 @@
     })()
   );
 
-  Popcorn.forEach( "enable disable".split(" "), function( method ) {
-    Popcorn.p[ method ] = function( plugin ) {
-      return Popcorn[ method ]( this, plugin );
-    };
+  Popcorn.forEach( "enable disable".split(" "), ( method ) -> {
+    Popcorn.p[ method ] = ( plugin ) => Popcorn[ method ]( this, plugin );
   });
 
   Popcorn.extend(Popcorn.p, {
 
     //  Rounded currentTime
-    roundTime: function() {
-      return -~this.media.currentTime;
-    },
+    roundTime: () => -~this.media.currentTime,
 
     //  Attach an event to a single point in time
-    exec: function( time, fn ) {
+    exec: ( time, fn ) -> {
 
       //  Creating a one second track event with an empty end
       Popcorn.addTrackEvent( this, {
@@ -553,9 +512,9 @@
     },
 
     // Mute the calling media, optionally toggle
-    mute: function( toggle ) {
+    mute: ( toggle ) -> {
 
-      var event = toggle == null || toggle === true ? "muted" : "unmuted";
+      let event = toggle == null || toggle === true ? "muted" : "unmuted";
 
       // If `toggle` is explicitly `false`,
       // unmute the media and restore the volume level
@@ -578,33 +537,29 @@
     },
 
     // Convenience method, unmute the calling media
-    unmute: function( toggle ) {
+    unmute: ( toggle ) -> {
 
       return this.mute( toggle == null ? false : !toggle );
     },
 
     // Get the client bounding box of an instance element
-    position: function() {
-      return Popcorn.position( this.media );
-    },
+    position: () => Popcorn.position( this.media ),
 
     // Toggle a plugin's playback behaviour (on or off) per instance
-    toggle: function( plugin ) {
-      return Popcorn[ this.data.disabled.indexOf( plugin ) > -1 ? "enable" : "disable" ]( this, plugin );
-    },
+    toggle: ( plugin ) => Popcorn[ this.data.disabled.indexOf( plugin ) > -1 ? "enable" : "disable" ]( this, plugin ),
 
     // Set default values for plugin options objects per instance
-    defaults: function( plugin, defaults ) {
+    defaults: ( plugin, defaults ) -> {
 
       // If an array of default configurations is provided,
       // iterate and apply each to this instance
-      if ( Popcorn.isArray( plugin ) ) {
+      if ( Array.isArray( plugin ) ) {
 
-        Popcorn.forEach( plugin, function( obj ) {
-          for ( var name in obj ) {
+        Popcorn.forEach( plugin, ( obj ) => do {
+          for ( let name in obj ) {
             this.defaults( name, obj[ name ] );
           }
-        }, this );
+        });
 
         return this;
       }
@@ -638,9 +593,9 @@
   internal.events.apiTypes = [ "UIEvents", "MouseEvents", "Events" ];
 
   // Privately compile events table at load time
-  (function( events, data ) {
+  (( events, data ) -> {
 
-    var apis = internal.events.apiTypes,
+    let apis = internal.events.apiTypes,
     eventsList = events.Natives.split( /\s+/g ),
     idx = 0, len = eventsList.length, prop;
 
@@ -648,11 +603,11 @@
       data.hash[ eventsList[idx] ] = true;
     }
 
-    apis.forEach(function( val, idx ) {
+    apis.forEach( (val, idx) -> {
 
       data.apis[ val ] = {};
 
-      var apiEvents = events[ val ].split( /\s+/g ),
+      let apiEvents = events[ val ].split( /\s+/g ),
       len = apiEvents.length,
       k = 0;
 
@@ -664,16 +619,16 @@
 
   Popcorn.events = {
 
-    isNative: function( type ) {
+    isNative: ( type ) -> {
       return !!internal.events.hash[ type ];
     },
-    getInterface: function( type ) {
+    getInterface: ( type ) -> {
 
       if ( !Popcorn.events.isNative( type ) ) {
         return false;
       }
 
-      var eventApi = internal.events,
+      let eventApi = internal.events,
         apis = eventApi.apiTypes,
         apihash = eventApi.apis,
         idx = 0, len = apis.length, api, tmp;
@@ -692,9 +647,9 @@
     all: Popcorn.Events.Natives.split( /\s+/g ),
     //  Defines all Event handling static functions
     fn: {
-      trigger: function( type, data ) {
+      trigger: ( type, data ) -> {
 
-        var eventInterface, evt;
+        let eventInterface, evt;
         //  setup checks for custom event system
         if ( this.data.events[ type ] && Popcorn.sizeOf( this.data.events[ type ] ) ) {
 
@@ -711,20 +666,15 @@
           }
 
           //  Custom events
-          Popcorn.forEach( this.data.events[ type ], function( obj, key ) {
-
-            obj.call( this, data );
-
-          }, this );
+          Popcorn.forEach( this.data.events[ type ], ( obj, key ) => obj.call( this, data ) );
 
         }
 
         return this;
       },
-      listen: function( type, fn ) {
+      listen: ( type, fn ) -> {
 
-        var self = this,
-            hasEvents = true,
+        let hasEvents = true,
             eventHook = Popcorn.events.hooks[ type ],
             origType = type,
             tmp;
@@ -752,7 +702,7 @@
             tmp = fn;
 
             fn = function wrapper( event ) {
-              eventHook.handler.call( self, event, tmp );
+              eventHook.handler.call( this, event, tmp );
             };
           }
 
@@ -773,11 +723,11 @@
         // only attach one event of any type
         if ( !hasEvents && Popcorn.events.all.indexOf( type ) > -1 ) {
 
-          this.media.addEventListener( type, function( event ) {
+          this.media.addEventListener( type, ( event ) => do {
 
-            Popcorn.forEach( self.data.events[ type ], function( obj, key ) {
+            Popcorn.forEach( this.data.events[ type ], ( obj, key ) => do {
               if ( typeof obj === "function" ) {
-                obj.call( self, event );
+                obj.call( this, event );
               }
             });
 
@@ -785,11 +735,11 @@
         }
         return this;
       },
-      unlisten: function( type, fn ) {
+      unlisten: ( type, fn ) -> {
 
         if ( this.data.events[ type ] && this.data.events[ type ][ fn ] ) {
 
-          delete this.data.events[ type ][ fn ];
+          this.data.events[ type ][ fn ] = void 0;
 
           return this;
         }
@@ -802,9 +752,9 @@
     hooks: {
       canplayall: {
         bind: "canplaythrough",
-        add: function( event, callback ) {
+        add: ( event, callback ) -> {
 
-          var state = false;
+          let state = false;
 
           if ( this.media.readyState ) {
 
@@ -833,12 +783,12 @@
 
   //  Extend Popcorn.events.fns (listen, unlisten, trigger) to all Popcorn instances
   //  Extend aliases (on, off, emit)
-  Popcorn.forEach( [ [ "trigger", "emit" ], [ "listen", "on" ], [ "unlisten", "off" ] ], function( key ) {
+  Popcorn.forEach( [ [ "trigger", "emit" ], [ "listen", "on" ], [ "unlisten", "off" ] ], ( key ) -> {
     Popcorn.p[ key[ 0 ] ] = Popcorn.p[ key[ 1 ] ] = Popcorn.events.fn[ key[ 0 ] ];
   });
 
   // Internal Only - Adds track events to the instance object
-  Popcorn.addTrackEvent = function( obj, track ) {
+  Popcorn.addTrackEvent = ( obj, track ) -> {
 
     // Determine if this track has default options set for it
     // If so, apply them to the track object
@@ -860,7 +810,7 @@
     track.end   = Popcorn.util.toSeconds( track.end, obj.options.framerate );
 
     //  Store this definition in an array sorted by times
-    var byStart = obj.data.trackEvents.byStart,
+    let byStart = obj.data.trackEvents.byStart,
         byEnd = obj.data.trackEvents.byEnd,
         startIndex, endIndex,
         currentTime;
@@ -924,15 +874,15 @@
   };
 
   // Internal Only - Adds track event references to the instance object's trackRefs hash table
-  Popcorn.addTrackEvent.ref = function( obj, track ) {
+  Popcorn.addTrackEvent.ref = ( obj, track ) -> {
     obj.data.trackRefs[ track._id ] = track;
 
     return obj;
   };
 
-  Popcorn.removeTrackEvent  = function( obj, removeId ) {
+  Popcorn.removeTrackEvent = ( obj, removeId ) -> {
 
-    var start, end, animate,
+    let start, end, animate,
         historyLen = obj.data.history.length,
         length = obj.data.trackEvents.byStart.length,
         index = 0,
@@ -1022,7 +972,7 @@
     obj.data.trackEvents.byEnd = byEnd;
     obj.data.trackEvents.animating = animating;
 
-    for ( var i = 0; i < historyLen; i++ ) {
+    for ( let i = 0; i < historyLen; i++ ) {
       if ( obj.data.history[ i ] !== removeId ) {
         history.push( obj.data.history[ i ] );
       }
@@ -1036,16 +986,16 @@
   };
 
   // Internal Only - Removes track event references from instance object's trackRefs hash table
-  Popcorn.removeTrackEvent.ref = function( obj, removeId ) {
+  Popcorn.removeTrackEvent.ref = ( obj, removeId ) -> {
     delete obj.data.trackRefs[ removeId ];
 
     return obj;
   };
 
   // Return an array of track events bound to this instance object
-  Popcorn.getTrackEvents = function( obj ) {
+  Popcorn.getTrackEvents = ( obj ) -> {
 
-    var trackevents = [],
+    let trackevents = [],
       refs = obj.data.trackEvents.byStart,
       length = refs.length,
       idx = 0,
@@ -1063,27 +1013,27 @@
   };
 
   // Internal Only - Returns an instance object's trackRefs hash table
-  Popcorn.getTrackEvents.ref = function( obj ) {
+  Popcorn.getTrackEvents.ref = ( obj ) -> {
     return obj.data.trackRefs;
   };
 
   // Return a single track event bound to this instance object
-  Popcorn.getTrackEvent = function( obj, trackId ) {
+  Popcorn.getTrackEvent = ( obj, trackId ) -> {
     return obj.data.trackRefs[ trackId ];
   };
 
   // Internal Only - Returns an instance object's track reference by track id
-  Popcorn.getTrackEvent.ref = function( obj, trackId ) {
+  Popcorn.getTrackEvent.ref = ( obj, trackId ) -> {
     return obj.data.trackRefs[ trackId ];
   };
 
-  Popcorn.getLastTrackEventId = function( obj ) {
+  Popcorn.getLastTrackEventId = ( obj ) -> {
     return obj.data.history[ obj.data.history.length - 1 ];
   };
 
-  Popcorn.timeUpdate = function( obj, event ) {
+  Popcorn.timeUpdate = ( obj, event ) -> {
 
-    var currentTime = obj.media.currentTime,
+    let currentTime = obj.media.currentTime,
         previousTime = obj.data.trackEvents.previousUpdateTime,
         tracks = obj.data.trackEvents,
         animating = tracks.animating,
@@ -1293,35 +1243,35 @@
   //  Map and Extend TrackEvent functions to all Popcorn instances
   Popcorn.extend( Popcorn.p, {
 
-    getTrackEvents: function() {
+    getTrackEvents: () -> {
       return Popcorn.getTrackEvents.call( null, this );
     },
 
-    getTrackEvent: function( id ) {
+    getTrackEvent: ( id ) -> {
       return Popcorn.getTrackEvent.call( null, this, id );
     },
 
-    getLastTrackEventId: function() {
+    getLastTrackEventId: () -> {
       return Popcorn.getLastTrackEventId.call( null, this );
     },
 
-    removeTrackEvent: function( id ) {
+    removeTrackEvent: ( id ) -> {
 
       Popcorn.removeTrackEvent.call( null, this, id );
       return this;
     },
 
-    removePlugin: function( name ) {
+    removePlugin: ( name ) -> {
       Popcorn.removePlugin.call( null, this, name );
       return this;
     },
 
-    timeUpdate: function( event ) {
+    timeUpdate: ( event ) -> {
       Popcorn.timeUpdate.call( null, this, event );
       return this;
     },
 
-    destroy: function() {
+    destroy: () -> {
       Popcorn.destroy.call( null, this );
       return this;
     }
@@ -1334,7 +1284,7 @@
   Popcorn.registryByName = {};
   //  An interface for extending Popcorn
   //  with plugin functionality
-  Popcorn.plugin = function( name, definition, manifest ) {
+  Popcorn.plugin = ( name, definition, manifest ) -> {
 
     if ( Popcorn.protect.natives.indexOf( name.toLowerCase() ) >= 0 ) {
       Popcorn.error( "'" + name + "' is a protected function name" );
@@ -1343,19 +1293,19 @@
 
     //  Provides some sugar, but ultimately extends
     //  the definition into Popcorn.p
-    var reserved = [ "start", "end" ],
+    let reserved = [ "start", "end" ],
         plugin = {},
         setup,
         isfn = typeof definition === "function",
         methods = [ "_setup", "_teardown", "start", "end", "frame" ];
 
     // combines calls of two function calls into one
-    var combineFn = function( first, second ) {
+    let combineFn = ( first, second ) -> {
 
       first = first || Popcorn.nop;
       second = second || Popcorn.nop;
 
-      return function() {
+      return () -> {
         first.apply( this, arguments );
         second.apply( this, arguments );
       };
@@ -1366,18 +1316,18 @@
     Popcorn.manifest[ name ] = manifest = manifest || definition.manifest || {};
 
     // apply safe, and empty default functions
-    methods.forEach(function( method ) {
+    methods.forEach(( method ) -> {
       definition[ method ] = safeTry( definition[ method ] || Popcorn.nop, name );
     });
 
-    var pluginFn = function( setup, options ) {
+    let pluginFn = ( setup, options ) -> {
 
       if ( !options ) {
         return this;
       }
 
       //  Storing the plugin natives
-      var natives = options._natives = {},
+      let natives = options._natives = {},
           compose = "",
           originalOpts, manifestOpts;
 
@@ -1390,9 +1340,9 @@
       natives.end = natives.end || natives[ "out" ];
 
       // extend teardown to always call end if running
-      natives._teardown = combineFn(function() {
+      natives._teardown = combineFn(() -> {
 
-        var args = slice.call( arguments );
+        let args = slice.call( arguments );
 
         // end function signature is not the same as teardown,
         // put null on the front of arguments for the event parameter
@@ -1410,13 +1360,13 @@
       // join the two arrays together
       options.compose = options.compose.concat( options.effect );
 
-      options.compose.forEach(function( composeOption ) {
+      options.compose.forEach(( composeOption ) -> {
 
         // if the requested compose is garbage, throw it away
         compose = Popcorn.compositions[ composeOption ] || {};
 
         // extends previous functions with compose function
-        methods.forEach(function( method ) {
+        methods.forEach(( method ) -> {
           natives[ method ] = combineFn( natives[ method ], compose[ method ] );
         });
       });
@@ -1436,8 +1386,8 @@
       // Use hasOwn to detect non-inherited toString, since all
       // objects will receive a toString - its otherwise undetectable
       if ( !hasOwn.call( options, "toString" ) ) {
-        options.toString = function() {
-          var props = [
+        options.toString = () -> {
+          let props = [
             "start: " + options.start,
             "end: " + options.end,
             "id: " + (options.id || options._id)
@@ -1470,7 +1420,7 @@
 
       //  Future support for plugin event definitions
       //  for all of the native events
-      Popcorn.forEach( setup, function( callback, type ) {
+      Popcorn.forEach( setup, ( callback, type ) -> {
 
         if ( type !== "type" ) {
 
@@ -1487,10 +1437,10 @@
 
     //  Extend Popcorn.p with new named definition
     //  Assign new named definition
-    Popcorn.p[ name ] = plugin[ name ] = function( options ) {
+    Popcorn.p[ name ] = plugin[ name ] = ( options ) -> {
 
       // Merge with defaults if they exist, make sure per call is prioritized
-      var defaults = ( this.options.defaults && this.options.defaults[ name ] ) || {},
+      let defaults = ( this.options.defaults && this.options.defaults[ name ] ) || {},
           mergedSetupOpts = Popcorn.extend( {}, defaults, options );
 
       return pluginFn.call( this, isfn ? definition.call( this, mergedSetupOpts ) : definition,
@@ -1498,7 +1448,7 @@
     };
 
     //  Push into the registry
-    var entry = {
+    let entry = {
       fn: plugin[ name ],
       definition: definition,
       base: definition,
@@ -1520,10 +1470,10 @@
 
   // Returns wrapped plugin function
   function safeTry( fn, pluginName ) {
-    return function() {
+    return () -> {
 
       //  When Popcorn.plugin.debug is true, do not suppress errors
-      if ( Popcorn.plugin.debug ) {
+      if ( Popcorn.plugin.debug ) -> {
         return fn.apply( this, arguments );
       }
 
@@ -1550,7 +1500,7 @@
 
   //  removePlugin( type ) removes all tracks of that from all instances of popcorn
   //  removePlugin( obj, type ) removes all tracks of type from obj, where obj is a single instance of popcorn
-  Popcorn.removePlugin = function( obj, name ) {
+  Popcorn.removePlugin = ( obj, name ) -> {
 
     //  Check if we are removing plugin from an instance or from all of Popcorn
     if ( !name ) {
@@ -1564,18 +1514,19 @@
         return;
       }
 
-      var registryLen = Popcorn.registry.length,
+      let registryLen = Popcorn.registry.length,
           registryIdx;
 
       // remove plugin reference from registry
       for ( registryIdx = 0; registryIdx < registryLen; registryIdx++ ) {
         if ( Popcorn.registry[ registryIdx ].name === name ) {
           Popcorn.registry.splice( registryIdx, 1 );
-          delete Popcorn.registryByName[ name ];
-          delete Popcorn.manifest[ name ];
+
+          Popcorn.registryByName[ name ] = void 0;
+          Popcorn.manifest[ name ] = void 0;
 
           // delete the plugin
-          delete obj[ name ];
+          obj[ name ] = void 0;
 
           // plugin found and removed, stop checking, we are done
           return;
@@ -1584,7 +1535,7 @@
 
     }
 
-    var byStart = obj.data.trackEvents.byStart,
+    let byStart = obj.data.trackEvents.byStart,
         byEnd = obj.data.trackEvents.byEnd,
         animating = obj.data.trackEvents.animating,
         idx, sl;
@@ -1631,7 +1582,7 @@
   Popcorn.compositions = {};
 
   //  Plugin inheritance
-  Popcorn.compose = function( name, definition, manifest ) {
+  Popcorn.compose = ( name, definition, manifest ) -> {
 
     //  If `manifest` arg is undefined, check for manifest within the `definition` object
     //  If no `definition.manifest`, an empty object is a sufficient fallback
@@ -1644,7 +1595,7 @@
   Popcorn.plugin.effect = Popcorn.effect = Popcorn.compose;
 
   //  Cache references to reused RegExps
-  var rparams = /\?/,
+  let rparams = /\?/,
   //  XHR Setup object
   setup = {
     url: "",
@@ -1653,17 +1604,17 @@
     success: Popcorn.nop,
     type: "GET",
     async: true,
-    xhr: function() {
+    xhr: () -> {
       return new global.XMLHttpRequest();
     }
   };
 
-  Popcorn.xhr = function( options ) {
+  Popcorn.xhr = ( options ) -> {
 
     options.dataType = options.dataType && options.dataType.toLowerCase() || null;
 
     if ( options.dataType &&
-         ( options.dataType === "jsonp" || options.dataType === "script" ) ) {
+         ( options.dataType === "jsonp" || options.dataType === "script" ) ) -> {
 
       Popcorn.xhr.getJSONP(
         options.url,
@@ -1673,7 +1624,7 @@
       return;
     }
 
-    var settings = Popcorn.extend( {}, setup, options );
+    let settings = Popcorn.extend( {}, setup, options );
 
     //  Create new XMLHttpRequest object
     settings.ajax  = settings.xhr();
@@ -1698,12 +1649,12 @@
   };
 
 
-  Popcorn.xhr.httpData = function( settings ) {
+  Popcorn.xhr.httpData = ( settings ) -> {
 
-    var data, json = null,
+    let data, json = null,
         parser, xml = null;
 
-    settings.ajax.onreadystatechange = function() {
+    settings.ajax.onreadystatechange = () {
 
       if ( settings.ajax.readyState === 4 ) {
 
@@ -1748,9 +1699,9 @@
     return data;
   };
 
-  Popcorn.xhr.getJSONP = function( url, success, isScript ) {
+  Popcorn.xhr.getJSONP = ( url, success, isScript ) -> {
 
-    var head = document.head || document.getElementsByTagName( "head" )[ 0 ] || document.documentElement,
+    let head = document.head || document.getElementsByTagName( "head" )[ 0 ] || document.documentElement,
       script = document.createElement( "script" ),
       paramStr = url.split( "?" )[ 1 ],
       isFired = false,
@@ -1780,7 +1731,7 @@
       }
 
       //  Define the JSONP success callback globally
-      window[ callback ] = function( data ) {
+      window[ callback ] = ( data ) -> {
         // Fire success callbacks
         success && success( data );
         isFired = true;
@@ -1790,7 +1741,7 @@
       url = url.replace( parts.join( "=" ), parts[ 0 ] + "=" + callback );
     }
 
-    script.addEventListener( "load",  function() {
+    script.addEventListener( "load", () -> {
 
       //  Handling remote script loading callbacks
       if ( isScript ) {
@@ -1816,10 +1767,7 @@
 
   Popcorn.getJSONP = Popcorn.xhr.getJSONP;
 
-  Popcorn.getScript = Popcorn.xhr.getScript = function( url, success ) {
-
-    return Popcorn.xhr.getJSONP( url, success, true );
-  };
+  Popcorn.getScript = ( url, success ) => Popcorn.xhr.getJSONP( url, success, true );
 
   Popcorn.util = {
     // Simple function to parse a timestamp into seconds
@@ -1827,11 +1775,11 @@
     // HH:MM:SS.MMM
     // HH:MM:SS;FF
     // Hours and minutes are optional. They default to 0
-    toSeconds: function( timeStr, framerate ) {
+    toSeconds: ( timeStr, framerate ) -> {
       // Hours and minutes are optional
       // Seconds must be specified
       // Seconds can be followed by milliseconds OR by the frame information
-      var validTimeFormat = /^([0-9]+:){0,2}[0-9]+([.;][0-9]+)?$/,
+      let validTimeFormat = /^([0-9]+:){0,2}[0-9]+([.;][0-9]+)?$/,
           errorMessage = "Invalid time format",
           digitPairs, lastIndex, lastPair, firstPair,
           frameInfo, frameTime;
@@ -1884,9 +1832,7 @@
 
   //  Protected API methods
   Popcorn.protect = {
-    natives: getKeys( Popcorn.p ).map(function( val ) {
-      return val.toLowerCase();
-    })
+    natives: Object.keys( Popcorn.p ).map( (val) => val.toLowerCase() )
   };
 
   // Setup logging for deprecated methods
@@ -1897,11 +1843,11 @@
     "trigger": "emit",
     "exec": "cue"
 
-  }, function( recommend, api ) {
-    var original = Popcorn.p[ api ];
+  }, ( recommend, api ) -> {
+    let original = Popcorn.p[ api ];
     // Override the deprecated api method with a method of the same name
     // that logs a warning and defers to the new recommended method
-    Popcorn.p[ api ] = function() {
+    Popcorn.p[ api ] = () -> {
       if ( typeof console !== "undefined" && console.warn ) {
         console.warn(
           "Deprecated method '" + api + "', " +
