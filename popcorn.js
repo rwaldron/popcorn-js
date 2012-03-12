@@ -364,7 +364,7 @@
       return size;
     },
 
-    nop: () -> void 0,
+    nop: () => void 0,
 
     position: ( elem ) -> {
 
