@@ -417,13 +417,8 @@
       return instance;
     },
     destroy: ( instance ) -> {
-      let events = instance.data.events,
-          singleEvent, item, fn;
 
-      //  Iterate through all events and remove them
-      for ( singleEvent of events ) {
-        singleEvent = void 0;
-      }
+      instance.data.events = {};
 
       if ( !instance.isDestroyed ) {
         instance.data.timeUpdate && instance.media.removeEventListener( "timeupdate", instance.data.timeUpdate, false );
