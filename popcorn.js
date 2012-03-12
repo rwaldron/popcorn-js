@@ -279,9 +279,7 @@
 
         } else {
 
-          this.data.timeUpdate = ( event ) => do {
-            Popcorn.timeUpdate( this, event );
-          };
+          this.data.timeUpdate = ( event ) => Popcorn.timeUpdate( this, event );
 
           if ( !this.isDestroyed ) {
             this.media.addEventListener( "timeupdate", this.data.timeUpdate, false );
