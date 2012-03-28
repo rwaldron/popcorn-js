@@ -17,7 +17,7 @@
     return;
   }
 
-  let
+  var
 
   AP = Array.prototype,
   OP = Object.prototype,
