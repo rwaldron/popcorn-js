@@ -20,6 +20,48 @@ test( "Core", function() {
   } catch ( e ) {};
 });
 
+asyncTest( "Codecs", function() {
+
+  var temp,
+      description = "Correctly detects codecs that cannot be played",
+      // barf
+      agent = navigator.userAgent.match(/(firefox|chrome|opera|safari|ie)/gi)[0].toLowerCase(),
+      videos = {
+        ogv: (temp = document.createElement("video"), temp.src = "/test/trailer.ogv", temp),
+        mp4: (temp = document.createElement("video"), temp.src = "/test/trailer.mp4", temp),
+        webm: (temp = document.createElement("video"), temp.src = "/test/trailer.webm", temp),
+        avi: (temp = document.createElement("video"), temp.src = "/test/trailer.avi", temp)
+      };
+
+  if ( agent === "safari" ) {
+    try {
+      Popcorn( videos.ogv );
+    } catch ( e ) {
+      equal( e.message, "Cannot play videos of type video/ogg", description );
+      start();
+    }
+  }
+
+  if ( agent === "opera" || agent === "firefox" || agent === "chrome" ) {
+    try {
+      Popcorn( videos.avi );
+    } catch ( e ) {
+      equal( e.message, "Cannot play videos of type video/avi", description );
+      start();
+    }
+  }
+
+  if ( agent === "ie" ) {
+    try {
+      Popcorn( videos.webm );
+    } catch ( e ) {
+      equal( e.message, "Cannot play videos of type video/webm", description );
+      start();
+    }
+  }
+
+});
+
 test( "noConflict", function() {
 
   expect( 6 );
@@ -3702,7 +3744,7 @@ asyncTest( "Popcorn.disable/enable/toggle (timeupdate)", function() {
       expects = 17;
 
   Popcorn.plugin.debug = true;
-      
+
   expect( expects );
 
   function plus() {
@@ -3734,7 +3776,7 @@ asyncTest( "Popcorn.disable/enable/toggle (timeupdate)", function() {
 
     // pause to ensure end is never called outside of disable and toggle
     $pop.pause();
-    
+
     equal( startCalls, 1, "start is called once, to initiate state" );
     plus();
 
@@ -3752,7 +3794,7 @@ asyncTest( "Popcorn.disable/enable/toggle (timeupdate)", function() {
 
     ok( !$pop.data.disabled[ "toggler" ], "enable() plugin: toggler is enabled" );
     plus();
-    
+
     equal( startCalls, 2, "start is called once again, this time via enable" );
     plus();
 

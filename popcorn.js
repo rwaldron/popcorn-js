@@ -56,6 +56,14 @@
       };
   }()),
 
+  codecs = {
+    "ogv": "video/ogg",
+    "ogg": "video/ogg",
+    "mp4": "video/mp4",
+    "webm": "video/webm",
+    "avi": "video/avi"
+  },
+
   //  Non-public `getKeys`, return an object's keys as an array
   getKeys = function( obj ) {
     return Object.keys ? Object.keys( obj ) : (function( obj ) {
@@ -93,7 +101,8 @@
 
     init: function( entity, options ) {
 
-      var matches,
+      var matches, source, codec,
+          canplaytype = true,
           self = this;
 
       //  Supports Popcorn(function () { /../ })
@@ -164,7 +173,7 @@
 
       this.data = {
 
-        // data structure of all 
+        // data structure of all
         running: {
           cue: []
         },
@@ -219,7 +228,7 @@
         // start: 0, end: 1 will start, end, start again, when it should just start
         // just setting it to 0 if it is below 0 fixes this issue
         if ( self.media.currentTime < 0 ) {
-        
+
           self.media.currentTime = 0;
         }
 
@@ -249,7 +258,7 @@
           self.data.timeUpdate = function () {
 
             Popcorn.timeUpdate( self, {} );
-            
+
             // fire frame for each enabled active plugin of every type
             Popcorn.forEach( Popcorn.manifest, function( key, val ) {
 
@@ -268,7 +277,7 @@
                 }
               }
             });
-            
+
             self.emit( "timeupdate" );
 
             !self.isDestroyed && requestAnimFrame( self.data.timeUpdate );
@@ -288,12 +297,28 @@
         }
       };
 
-      if ( self.media.readyState >= 2 ) {
+      source = this.media.src || this.media.currentSrc;
 
-        isReady();
-      } else {
+      if ( this.media.canPlayType && /ogv|ogg|mp4|webm|avi$/.test(source) ) {
+        codec = codecs[ source.slice( source.lastIndexOf(".") + 1 ) ];
 
-        self.media.addEventListener( "loadeddata", isReady, false );
+        if ( codec ) {
+          canplaytype = !!this.media.canPlayType( codec );
+
+          if ( !canplaytype ) {
+            Popcorn.error( "Cannot play videos of type " + codec );
+          }
+        }
+      }
+
+      if ( canplaytype ) {
+        if ( this.media.readyState >= 2 ) {
+
+          isReady();
+        } else {
+
+          this.media.addEventListener( "loadeddata", isReady, false );
+        }
       }
 
       return this;
@@ -423,7 +448,7 @@
       return instance;
     },
     enable: function( instance, plugin ) {
-      
+
       if ( instance.data.disabled[ plugin ] ) {
 
         instance.data.disabled[ plugin ] = false;
