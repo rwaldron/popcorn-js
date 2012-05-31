@@ -1199,10 +1199,10 @@
 
               natives.end.call( obj, event, byStart );
 
-              obj.emit( trackend,
-                Popcorn.extend({}, byEnd, {
+              obj.emit( trackstart,
+                Popcorn.extend({}, byStart, {
                   plugin: type,
-                  type: trackend
+                  type: trackstart
                 })
               );
             }
@@ -1236,10 +1236,10 @@
 
               natives.start.call( obj, event, byEnd );
 
-              obj.emit( trackstart,
-                Popcorn.extend({}, byStart, {
+              obj.emit( trackend,
+                Popcorn.extend({}, byEnd, {
                   plugin: type,
-                  type: trackstart
+                  type: trackend
                 })
               );
             }
